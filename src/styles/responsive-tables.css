@@ -1,0 +1,120 @@
+/* Responsive Table Styles */
+
+/* Make tables scrollable on small screens */
+.ant-table-wrapper {
+  overflow-x: auto;
+}
+
+/* Adjust table for mobile */
+@media (max-width: 768px) {
+  /* Make table scroll horizontally */
+  .ant-table {
+    min-width: 600px;
+  }
+  
+  /* Reduce padding in table cells */
+  .ant-table-tbody > tr > td,
+  .ant-table-thead > tr > th {
+    padding: 8px 4px !important;
+    font-size: 12px;
+  }
+  
+  /* Make action buttons smaller */
+  .ant-table-tbody > tr > td .ant-btn-sm {
+    padding: 0 4px;
+    font-size: 12px;
+  }
+  
+  /* Stack buttons vertically in action column */
+  .ant-space-horizontal {
+    flex-direction: column;
+    gap: 4px !important;
+  }
+  
+  .ant-space-horizontal .ant-space-item {
+    width: 100%;
+  }
+  
+  .ant-space-horizontal .ant-btn {
+    width: 100%;
+  }
+}
+
+/* Tablet adjustments */
+@media (max-width: 1024px) {
+  .ant-table-tbody > tr > td,
+  .ant-table-thead > tr > th {
+    padding: 12px 8px !important;
+    font-size: 13px;
+  }
+}
+
+/* Make cards responsive */
+@media (max-width: 768px) {
+  .ant-card {
+    margin: 8px;
+  }
+  
+  .ant-card-head {
+    padding: 12px;
+  }
+  
+  .ant-card-body {
+    padding: 12px;
+  }
+  
+  /* Make form items stack on mobile */
+  .ant-row {
+    flex-direction: column;
+  }
+  
+  .ant-col {
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+}
+
+/* Responsive pagination */
+@media (max-width: 576px) {
+  .ant-pagination {
+    text-align: center;
+  }
+  
+  .ant-pagination-item,
+  .ant-pagination-prev,
+  .ant-pagination-next {
+    margin: 2px;
+  }
+}
+
+/* Make modals responsive */
+@media (max-width: 768px) {
+  .ant-modal {
+    max-width: calc(100vw - 32px) !important;
+    margin: 16px auto;
+  }
+  
+  .ant-modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+}
+
+/* Responsive tags */
+@media (max-width: 576px) {
+  .ant-tag {
+    font-size: 11px;
+    padding: 0 4px;
+  }
+}
+
+/* Make search and filter sections responsive */
+@media (max-width: 768px) {
+  .ant-input-search {
+    width: 100% !important;
+  }
+  
+  .ant-select {
+    width: 100% !important;
+  }
+}

@@ -1,0 +1,75 @@
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-input-field {
+  border-radius: 8px !important;
+  border: 1px solid #d1d5db !important;
+  transition: all 0.2s ease-in-out !important;
+  background-color: #ffffff !important;
+}
+
+.search-input-field:hover {
+  border-color: #9ca3af !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+.search-input-field:focus,
+.search-input-field.ant-input-focused {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  outline: none !important;
+}
+
+.search-input-field .ant-input {
+  border: none !important;
+  box-shadow: none !important;
+  padding-left: 8px !important;
+}
+
+.search-input-field .ant-input:focus {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.search-icon {
+  color: #6b7280;
+  margin-right: 8px;
+}
+
+.search-input-field:focus .search-icon,
+.search-input-field.ant-input-focused .search-icon {
+  color: #3b82f6;
+}
+
+/* Size variations */
+.search-input-field.ant-input-sm {
+  padding: 4px 8px !important;
+}
+
+.search-input-field.ant-input-lg {
+  padding: 8px 12px !important;
+  font-size: 16px !important;
+}
+
+/* Clear button styling */
+.search-input-field .ant-input-clear-icon {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.search-input-field .ant-input-clear-icon:hover {
+  color: #6b7280;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .search-input-wrapper {
+    width: 100%;
+  }
+  
+  .search-input-field {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+}
