@@ -51,20 +51,20 @@ export default function Sidebar({
   // Check if user is admin (has admin role or many permissions)
   const isAdmin = React.useMemo(() => {
     if (!user || !user.Roles) return false;
-    
+
     // Check if user has admin role
     const hasAdminRole = user.Roles.some(role => role.name === 'admin');
-    
+
     // Or if user has many permissions (fallback)
     const hasManyPermissions = permissions.length > 20;
-    
+
     return hasAdminRole || hasManyPermissions;
   }, [user, permissions]);
 
   const menu = [
-    { 
-      to: "/dashboard", 
-      label: "Dashboard", 
+    {
+      to: "/dashboard",
+      label: "Dashboard",
       icon: LayoutDashboard,
       permissions: [] // Dashboard accessible to all authenticated users
     },
@@ -80,15 +80,15 @@ export default function Sidebar({
         { to: "/bom", label: "Bill of Materials", permissions: ["product.read"] },
       ],
     },
-    { 
-      to: "/raw-materials", 
-      label: "Raw Materials", 
+    {
+      to: "/raw-materials",
+      label: "Raw Materials",
       icon: Layers,
       permissions: ["product.read"]
     },
-    { 
-      to: "/stock/list", 
-      label: "Stock Management", 
+    {
+      to: "/stock/list",
+      label: "Stock Management",
       icon: Box,
       permissions: ["stock.read"]
     },
@@ -127,21 +127,21 @@ export default function Sidebar({
         { to: "/permissions", label: "Permissions", permissions: ["permission.view"] },
       ],
     },
-    { 
-      to: "/branch", 
-      label: "Branches", 
+    {
+      to: "/branch",
+      label: "Branches",
       icon: HousePlus,
       permissions: ["supplier.read"] // Using supplier.read as branch permission
     },
-    { 
-      to: "/report", 
-      label: "Reports", 
+    {
+      to: "/report",
+      label: "Reports",
       icon: BarChart3,
       permissions: ["reports.view"]
     },
-    { 
-      to: "/audit-logs", 
-      label: "Audit Logs", 
+    {
+      to: "/audit-logs",
+      label: "Audit Logs",
       icon: Shield,
       permissions: ["audit.view"]
     },
@@ -153,21 +153,21 @@ export default function Sidebar({
     if (loading) {
       return menu;
     }
-    
+
     return menu.filter(item => {
       // If no permissions specified, show to all authenticated users
       if (!item.permissions || item.permissions.length === 0) {
         return true;
       }
-      
+
       // If user is admin, show all items
       if (isAdmin) {
         return true;
       }
-      
+
       // Check if user has any of the required permissions
       const hasAccess = hasAnyPermission(item.permissions);
-      
+
       // If parent has access, filter children based on their permissions
       if (hasAccess && item.children) {
         item.children = item.children.filter(child => {
@@ -180,7 +180,7 @@ export default function Sidebar({
           return hasAnyPermission(child.permissions);
         });
       }
-      
+
       return hasAccess;
     });
   };

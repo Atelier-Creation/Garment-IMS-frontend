@@ -16,10 +16,10 @@ import { reportService } from "../services";
 import { StatCard } from "../components";
 
 // Import GIF icons
-import RevenueGrowth from "../../public/revenue-growth.gif";
-import ProductGIF from "../../public/Product.gif";
-import UserGIF from "../../public/not-available.gif";
-import BillsGIF from "../../public/invoice-bill.gif";
+const RevenueGrowth = "/revenue-growth.gif";
+const ProductGIF = "/Product.gif";
+const UserGIF = "/not-available.gif";
+const BillsGIF = "/invoice-bill.gif";
 
 const { Title, Text } = Typography;
 
@@ -31,10 +31,10 @@ const styles = {
 // Simple Chart Components
 const SimplePieChart = ({ data }) => {
   console.log('SimplePieChart data:', data); // Debug log
-  
+
   const total = data.reduce((sum, item) => sum + item.value, 0);
   const colors = ['#1890ff', '#52c41a', '#faad14', '#f5222d', '#722ed1'];
-  
+
   if (total === 0 || data.length === 0) {
     return (
       <div className="text-center py-8">
@@ -43,7 +43,7 @@ const SimplePieChart = ({ data }) => {
       </div>
     );
   }
-  
+
   return (
     <div className="text-center">
       {/* Simple circular representation */}
@@ -55,15 +55,15 @@ const SimplePieChart = ({ data }) => {
           </div>
         </div>
       </div>
-      
+
       <div className="space-y-2">
         {data.map((item, index) => {
           const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : 0;
           return (
             <div key={index} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
               <div className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
+                <div
+                  className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: colors[index % colors.length] }}
                 />
                 <span className="font-medium">{item.type}</span>
@@ -82,10 +82,10 @@ const SimplePieChart = ({ data }) => {
 
 const SimpleBarChart = ({ data }) => {
   console.log('SimpleBarChart data:', data); // Debug log
-  
+
   const maxValue = Math.max(...data.map(item => item.value), 1); // Ensure at least 1 to avoid division by 0
   const colors = ['#f5222d', '#faad14', '#1890ff', '#52c41a'];
-  
+
   if (data.length === 0) {
     return (
       <div className="text-center py-8">
@@ -94,7 +94,7 @@ const SimpleBarChart = ({ data }) => {
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-4">
       {data.map((item, index) => (
@@ -122,7 +122,7 @@ const SimpleBarChart = ({ data }) => {
 
 const SimpleLineChart = ({ data }) => {
   console.log('SimpleLineChart data:', data); // Debug log
-  
+
   if (data.length === 0) {
     return (
       <div className="text-center py-8">
@@ -131,7 +131,7 @@ const SimpleLineChart = ({ data }) => {
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -143,7 +143,7 @@ const SimpleLineChart = ({ data }) => {
           </div>
         ))}
       </div>
-      
+
       {/* Simple trend indicator */}
       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
         <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
@@ -157,9 +157,9 @@ const SimpleLineChart = ({ data }) => {
 
 const SimpleProductChart = ({ data }) => {
   console.log('SimpleProductChart data:', data); // Debug log
-  
+
   const maxValue = Math.max(...data.map(item => item.sold), 1);
-  
+
   if (data.length === 0) {
     return (
       <div className="text-center py-8">
@@ -168,7 +168,7 @@ const SimpleProductChart = ({ data }) => {
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-4">
       {data.slice(0, 5).map((item, index) => (
@@ -232,7 +232,7 @@ const Dashboard = () => {
       try {
         const response = await reportService.getDashboardStats();
         console.log('Dashboard API Response:', response); // Debug log
-        
+
         if (mounted && response.success) {
           // Map the actual API response to expected format
           const mappedData = {
@@ -243,9 +243,9 @@ const Dashboard = () => {
             totalSuppliers: 0, // Not available in current API
             totalCustomers: 0, // Not available in current API
             lowStockItems: response.data.alerts?.low_stock_items || 0,
-            pendingOrders: (response.data.pending_orders?.sales || 0) + 
-                          (response.data.pending_orders?.purchase || 0) + 
-                          (response.data.pending_orders?.production || 0),
+            pendingOrders: (response.data.pending_orders?.sales || 0) +
+              (response.data.pending_orders?.purchase || 0) +
+              (response.data.pending_orders?.production || 0),
             // Keep original data for detailed display
             originalData: response.data,
             // Chart data with fallback mock data for testing
@@ -275,7 +275,7 @@ const Dashboard = () => {
             },
             recentActivities: response.data.recent_activities || []
           };
-          
+
           console.log('Sales this month:', response.data.sales?.this_month);
           console.log('Total Orders:', mappedData.totalOrders);
           console.log('Total Revenue:', mappedData.totalRevenue);
@@ -287,10 +287,10 @@ const Dashboard = () => {
         message.error('Failed to load dashboard statistics');
         if (mounted) {
           // Fallback to mock data with sample charts
-          setSummary({ 
-            totalProducts: 1, 
-            totalUsers: 0, 
-            totalOrders: 0, 
+          setSummary({
+            totalProducts: 1,
+            totalUsers: 0,
+            totalOrders: 0,
             totalRevenue: 0,
             totalSuppliers: 0,
             totalCustomers: 0,
@@ -384,7 +384,7 @@ const Dashboard = () => {
       linkTo: "/sales-orders"
     },
     {
-      title: "Pending Purchases", 
+      title: "Pending Purchases",
       value: summary.originalData?.pending_orders?.purchase ?? 0,
       linkTo: "/purchase-orders"
     },
@@ -440,7 +440,7 @@ const Dashboard = () => {
           ))
           : summaryCards.map((s) => (
             <Col xs={24} sm={12} md={12} lg={6} xl={6} key={s.id}>
-              <StatCard 
+              <StatCard
                 title={s.title}
                 value={s.value}
                 percentage={s.percentage}
@@ -495,7 +495,7 @@ const Dashboard = () => {
             {loadingSummary ? (
               <Skeleton active />
             ) : (
-              <SimplePieChart 
+              <SimplePieChart
                 data={summary?.charts?.sales_by_status?.map(item => ({
                   type: item.status,
                   value: parseInt(item.count)
@@ -515,7 +515,7 @@ const Dashboard = () => {
             {loadingSummary ? (
               <Skeleton active />
             ) : (
-              <SimplePieChart 
+              <SimplePieChart
                 data={summary?.charts?.production_by_status?.map(item => ({
                   type: item.status,
                   value: parseInt(item.count)
@@ -538,7 +538,7 @@ const Dashboard = () => {
             {loadingSummary ? (
               <Skeleton active />
             ) : (
-              <SimpleBarChart 
+              <SimpleBarChart
                 data={summary?.charts?.stock_levels?.map(item => ({
                   level: item.stock_level,
                   value: parseInt(item.count)
@@ -558,7 +558,7 @@ const Dashboard = () => {
             {loadingSummary ? (
               <Skeleton active />
             ) : (
-              <SimpleLineChart 
+              <SimpleLineChart
                 data={summary?.charts?.monthly_sales_trend?.map(item => ({
                   month: item.month,
                   revenue: parseFloat(item.revenue || 0)
@@ -581,7 +581,7 @@ const Dashboard = () => {
             {loadingSummary ? (
               <Skeleton active />
             ) : (
-              <SimpleProductChart 
+              <SimpleProductChart
                 data={summary?.charts?.top_products?.map(item => ({
                   product: `${item.product_name} (${item.size}-${item.color})`,
                   sold: parseInt(item.total_sold)
@@ -604,16 +604,14 @@ const Dashboard = () => {
               ) : (
                 summary?.recentActivities?.length > 0 ? (
                   summary.recentActivities.slice(0, 5).map((activity, index) => (
-                    <div key={index} className={`flex items-center gap-3 p-3 rounded-lg ${
-                      activity.type === 'sales' ? 'bg-blue-50' :
-                      activity.type === 'production' ? 'bg-green-50' :
-                      'bg-orange-50'
-                    }`}>
-                      <div className={`w-2 h-2 rounded-full ${
-                        activity.type === 'sales' ? 'bg-blue-600' :
-                        activity.type === 'production' ? 'bg-green-600' :
-                        'bg-orange-600'
-                      }`}></div>
+                    <div key={index} className={`flex items-center gap-3 p-3 rounded-lg ${activity.type === 'sales' ? 'bg-blue-50' :
+                        activity.type === 'production' ? 'bg-green-50' :
+                          'bg-orange-50'
+                      }`}>
+                      <div className={`w-2 h-2 rounded-full ${activity.type === 'sales' ? 'bg-blue-600' :
+                          activity.type === 'production' ? 'bg-green-600' :
+                            'bg-orange-600'
+                        }`}></div>
                       <div className="flex-1">
                         <div className="text-sm font-medium">{activity.activity}</div>
                         <div className="text-xs text-gray-500">
