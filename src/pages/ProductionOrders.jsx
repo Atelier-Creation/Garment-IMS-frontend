@@ -72,8 +72,8 @@ const ProductionOrders = () => {
       }
       
       // Fetch variants for the product
-      const variantsResponse = await api.get("/product-variants", {
-        params: { product_id: productId, limit: 1000 }
+      const variantsResponse = await api.get(`/product-variants/product/${productId}`, {
+        params: { limit: 1000 }
       });
       if (variantsResponse.data.success) {
         setVariants(variantsResponse.data.data.productVariants || []);

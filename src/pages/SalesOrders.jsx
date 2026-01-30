@@ -153,7 +153,7 @@ const SalesOrders = () => {
 
   const handleProcess = async (record) => {
     try {
-      const shipped_items = record.SalesOrderItems.map(item => ({
+      const shipped_items = record.SalesOrderItem.map(item => ({
         item_id: item.id,
         shipped_quantity: item.qty
       }));

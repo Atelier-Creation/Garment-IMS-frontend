@@ -381,22 +381,22 @@ const Dashboard = () => {
     {
       title: "Pending Sales",
       value: summary.originalData?.pending_orders?.sales ?? 0,
-      linkTo: "/sales-orders"
+      linkTo: "/sales"
     },
     {
       title: "Pending Purchases",
       value: summary.originalData?.pending_orders?.purchase ?? 0,
-      linkTo: "/purchase-orders"
+      linkTo: "/order"
     },
     {
       title: "Pending Production",
       value: summary.originalData?.pending_orders?.production ?? 0,
-      linkTo: "/production-orders"
+      linkTo: "/production"
     },
     {
       title: "Low Stock Alerts",
       value: summary.lowStockItems ?? 0,
-      linkTo: "/stock"
+      linkTo: "/stock/list"
     }
   ];
 

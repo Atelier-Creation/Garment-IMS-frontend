@@ -35,7 +35,6 @@ const Billing = () => {
         limit: pagination.pageSize
       });
       
-      // billingService returns response.data directly
       if (response && response.success) {
         const billingsData = response.data || [];
         setBillings(billingsData);
@@ -43,10 +42,13 @@ const Billing = () => {
           ...prev,
           total: response.total || 0
         }));
+      } else {
+        setBillings([]);
       }
     } catch (error) {
       console.error('Fetch billings error:', error);
       message.error(error.response?.data?.message || 'Failed to load billings');
+      setBillings([]);
     } finally {
       setLoading(false);
     }
@@ -239,7 +241,7 @@ const Billing = () => {
         bill.order_number,
         bill.Customer?.name || 'N/A',
         dayjs(bill.order_date).format('DD/MM/YYYY HH:mm'),
-        bill.SalesOrderItems?.length || 0,
+        bill.SalesOrderItem?.length || 0,
         `₹${parseFloat(bill.subtotal_amount || 0).toFixed(2)}`,
         `₹${parseFloat(bill.tax_amount || 0).toFixed(2)}`,
         `₹${parseFloat(bill.total_amount || 0).toFixed(2)}`,
@@ -273,7 +275,7 @@ const Billing = () => {
 
   const handlePrintBill = (record) => {
     const printWindow = window.open('', '_blank');
-    const items = record.SalesOrderItems || [];
+    const items = record.SalesOrderItem || [];
     
     const printContent = `
       <!DOCTYPE html>
@@ -392,7 +394,7 @@ const Billing = () => {
     },
     {
       title: 'Items',
-      dataIndex: 'SalesOrderItems',
+      dataIndex: 'SalesOrderItem',
       key: 'items',
       render: (items) => items?.length || 0
     },
@@ -488,6 +490,11 @@ const Billing = () => {
 
   return (
     <div className="p-6">
+      {/* Debug info */}
+      <div style={{ background: '#f0f0f0', padding: '10px', marginBottom: '10px', fontSize: '12px' }}>
+        Debug: Billings loaded: {billings.length} | Loading: {loading.toString()} | Total: {pagination.total}
+      </div>
+      
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
@@ -844,7 +851,7 @@ const Billing = () => {
                   render: (total) => `₹${parseFloat(total).toFixed(2)}`
                 }
               ]}
-              dataSource={selectedBilling.SalesOrderItems || []}
+              dataSource={selectedBilling.SalesOrderItem || []}
               rowKey="id"
               pagination={false}
               size="small"
