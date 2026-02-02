@@ -1,22 +1,30 @@
-import React, { useState, useEffect } from "react";
-import { Card, Button, Table, Modal, Form, Select, InputNumber, Input, message, Tag, Space, DatePicker } from "antd";
+import React, { useState, useEffect, useRef } from "react";
+import { Card, Button, Table, Modal, Form, Select, InputNumber, Input, message, Tag, Space, DatePicker, Descriptions, Row, Col, Typography, Tooltip } from "antd";
+import { EyeOutlined, PrinterOutlined, FilePdfOutlined, FileExcelOutlined } from '@ant-design/icons';
 import { ShoppingCart, Plus, CheckCircle, Truck, XCircle } from "lucide-react";
 import { salesOrderService, customerService, productService } from "../services";
 import api from "../services/api";
 import dayjs from "dayjs";
+import { HelpTooltip } from "../components";
 
 const { Option } = Select;
 const { TextArea } = Input;
+const { Title, Text } = Typography;
 
 const SalesOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [viewingSalesOrder, setViewingSalesOrder] = useState(null);
   const [form] = Form.useForm();
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [branches, setBranches] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [customerModalVisible, setCustomerModalVisible] = useState(false);
+  const [customerForm] = Form.useForm();
+  const printRef = useRef();
 
   useEffect(() => {
     fetchOrders();
@@ -153,10 +161,10 @@ const SalesOrders = () => {
 
   const handleProcess = async (record) => {
     try {
-      const shipped_items = record.SalesOrderItem.map(item => ({
+      const shipped_items = record.SalesOrderItems?.map(item => ({
         item_id: item.id,
         shipped_quantity: item.qty
-      }));
+      })) || [];
 
       const response = await salesOrderService.processSalesOrder(record.id, {
         shipped_items,
@@ -186,6 +194,109 @@ const SalesOrders = () => {
     }
   };
 
+  const handleView = async (record) => {
+    try {
+      const response = await salesOrderService.getSalesOrderById(record.id);
+      if (response.success) {
+        setViewingSalesOrder(response.data.sales_order);
+        setViewModalVisible(true);
+      }
+    } catch (error) {
+      message.error('Failed to fetch sales order details');
+    }
+  };
+
+  const handlePrint = () => {
+    const printContent = printRef.current;
+    const windowPrint = window.open('', '', 'width=800,height=600');
+    windowPrint.document.write('<html><head><title>Sales Order</title>');
+    windowPrint.document.write('<style>');
+    windowPrint.document.write(`
+      body { font-family: Arial, sans-serif; padding: 20px; }
+      .header { text-align: center; margin-bottom: 30px; }
+      .header h1 { margin: 0; color: #1890ff; }
+      .info-section { margin-bottom: 20px; }
+      .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+      .label { font-weight: bold; }
+      table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+      th { background-color: #f0f0f0; }
+      .total-row { font-weight: bold; background-color: #f9f9f9; }
+      .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
+    `);
+    windowPrint.document.write('</style></head><body>');
+    windowPrint.document.write(printContent.innerHTML);
+    windowPrint.document.write('</body></html>');
+    windowPrint.document.close();
+    windowPrint.focus();
+    windowPrint.print();
+    windowPrint.close();
+  };
+
+  const handleExportPDF = () => {
+    message.info('PDF export functionality requires additional library. Printing instead...');
+    handlePrint();
+  };
+
+  const handleExportExcel = () => {
+    if (!viewingSalesOrder) return;
+    
+    const so = viewingSalesOrder;
+    let csvContent = "data:text/csv;charset=utf-8,";
+    
+    // Header
+    csvContent += "Sales Order\n\n";
+    csvContent += `Order Number:,${so.order_number}\n`;
+    csvContent += `Customer:,${so.Customer?.name || 'N/A'}\n`;
+    csvContent += `Order Date:,${dayjs(so.order_date).format('DD/MM/YYYY')}\n`;
+    csvContent += `Delivery Date:,${so.delivery_date ? dayjs(so.delivery_date).format('DD/MM/YYYY') : 'N/A'}\n`;
+    csvContent += `Status:,${so.status}\n\n`;
+    
+    // Items
+    csvContent += "Item,Product,Quantity,Unit Price,Total\n";
+    so.SalesOrderItems?.forEach((item, index) => {
+      csvContent += `${index + 1},`;
+      csvContent += `${item.ProductVariant?.Product?.product_name || 'N/A'} - ${item.ProductVariant?.size || ''} - ${item.ProductVariant?.color || ''},`;
+      csvContent += `${item.qty},`;
+      csvContent += `${item.unit_price},`;
+      csvContent += `${item.total}\n`;
+    });
+    
+    csvContent += `\nTotal Amount:,,,${so.total_amount}\n`;
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `SO_${so.order_number}_${dayjs().format('YYYYMMDD')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    message.success('Sales order exported successfully');
+  };
+
+  const handleCreateCustomer = async (values) => {
+    try {
+      const response = await customerService.createCustomer(values);
+      if (response.success) {
+        message.success('Customer created successfully');
+        setCustomerModalVisible(false);
+        customerForm.resetFields();
+        
+        // Refresh customers list
+        await fetchCustomers();
+        
+        // Auto-select the newly created customer
+        if (response.data && response.data.customer) {
+          form.setFieldsValue({ customer_id: response.data.customer.id });
+        }
+      }
+    } catch (error) {
+      message.error(error.response?.data?.message || 'Failed to create customer');
+      console.error('Error creating customer:', error);
+    }
+  };
+
   const getStatusColor = (status) => {
     const colors = {
       DRAFT: "orange",
@@ -201,7 +312,24 @@ const SalesOrders = () => {
     {
       title: "Order Number",
       dataIndex: "order_number",
-      key: "order_number"
+      key: "order_number",
+      render: (text, record) => (
+        <Tooltip title="Click to view sales order details">
+          <Button 
+            type="link" 
+            className="font-mono text-sm p-0 h-auto"
+            onClick={() => handleView(record)}
+            style={{ 
+              textDecoration: 'underline',
+              color: '#1890ff',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
+          >
+            {text}
+          </Button>
+        </Tooltip>
+      )
     },
     {
       title: "Customer",
@@ -241,6 +369,13 @@ const SalesOrders = () => {
       key: "actions",
       render: (_, record) => (
         <Space>
+          <Button
+            type="link"
+            icon={<EyeOutlined />}
+            onClick={() => handleView(record)}
+          >
+            View
+          </Button>
           {record.status === "DRAFT" && (
             <Button
               type="primary"
@@ -324,7 +459,13 @@ const SalesOrders = () => {
             <ShoppingCart size={20} className="text-gray-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Sales Orders</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Sales Orders
+              <HelpTooltip 
+                title="Sales Orders Management"
+                content="Create and manage customer sales orders. Add customers directly from the form, select products with variants, track order status, and view detailed order information. Click order numbers to view complete order details with export options."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Manage customer orders</p>
           </div>
         </div>
@@ -365,13 +506,62 @@ const SalesOrders = () => {
             label="Customer"
             rules={[{ required: true, message: "Please select customer" }]}
           >
-            <Select placeholder="Select customer" showSearch>
-              {customers.map((customer) => (
-                <Option key={customer.id} value={customer.id}>
-                  {customer.name}
-                </Option>
-              ))}
-            </Select>
+            <div className="flex gap-2">
+              <Select 
+                placeholder="Search customers by name, phone, or email..." 
+                showSearch
+                style={{ flex: 1 }}
+                filterOption={(input, option) => {
+                  const customer = customers.find(c => c.id === option.value);
+                  if (!customer) return false;
+                  
+                  const searchText = input.toLowerCase();
+                  const name = (customer.name || '').toLowerCase();
+                  const phone = (customer.phone || '').toLowerCase();
+                  const email = (customer.email || '').toLowerCase();
+                  const address = (customer.address || '').toLowerCase();
+                  
+                  return name.includes(searchText) || 
+                         phone.includes(searchText) || 
+                         email.includes(searchText) ||
+                         address.includes(searchText);
+                }}
+                optionFilterProp="children"
+                notFoundContent={
+                  <div className="text-center py-2">
+                    <div style={{ color: '#666', marginBottom: '8px' }}>No customers found</div>
+                    <Button 
+                      type="link" 
+                      size="small"
+                      onClick={() => setCustomerModalVisible(true)}
+                    >
+                      Create New Customer
+                    </Button>
+                  </div>
+                }
+              >
+                {customers.map((customer) => (
+                  <Option key={customer.id} value={customer.id}>
+                    <div>
+                      <div style={{ fontWeight: 'bold' }}>{customer.name}</div>
+                      <div style={{ fontSize: '12px', color: '#666' }}>
+                        {customer.phone && `📞 ${customer.phone}`}
+                        {customer.phone && customer.email && ' • '}
+                        {customer.email && `✉️ ${customer.email}`}
+                      </div>
+                    </div>
+                  </Option>
+                ))}
+              </Select>
+              <Button
+                type="dashed"
+                icon={<Plus size={16} />}
+                onClick={() => setCustomerModalVisible(true)}
+                title="Add new customer"
+              >
+                Add
+              </Button>
+            </div>
           </Form.Item>
 
           <Form.Item
@@ -462,6 +652,246 @@ const SalesOrders = () => {
             <Button onClick={() => setIsModalVisible(false)}>Cancel</Button>
             <Button type="primary" htmlType="submit">
               Create Order
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* View Sales Order Modal */}
+      <Modal
+        title={
+          <div style={{ textAlign: 'center' }}>
+            <Title level={3} style={{ margin: 0, color: '#1890ff' }}>
+              Sales Order Details
+            </Title>
+            {viewingSalesOrder && (
+              <Text type="secondary" style={{ fontSize: '14px' }}>
+                Order Number: {viewingSalesOrder.order_number}
+              </Text>
+            )}
+          </div>
+        }
+        open={viewModalVisible}
+        onCancel={() => setViewModalVisible(false)}
+        width={900}
+        footer={[
+          <Button key="print" icon={<PrinterOutlined />} onClick={handlePrint}>
+            Print
+          </Button>,
+          <Button key="pdf" icon={<FilePdfOutlined />} onClick={handleExportPDF}>
+            Export PDF
+          </Button>,
+          <Button key="excel" icon={<FileExcelOutlined />} onClick={handleExportExcel}>
+            Export Excel
+          </Button>,
+          <Button key="close" onClick={() => setViewModalVisible(false)}>
+            Close
+          </Button>
+        ]}
+      >
+        {viewingSalesOrder && (
+          <div ref={printRef}>
+            <div className="header" style={{ textAlign: 'center', marginBottom: '30px', borderBottom: '2px solid #1890ff', paddingBottom: '20px' }}>
+              <h1 style={{ margin: 0, color: '#1890ff', fontSize: '28px' }}>SALES ORDER</h1>
+              <p style={{ margin: '5px 0', fontSize: '16px', color: '#666' }}>
+                Order Number: <strong>{viewingSalesOrder.order_number}</strong>
+              </p>
+            </div>
+
+            <Row gutter={24} style={{ marginBottom: '30px' }}>
+              <Col span={12}>
+                <Card size="small" title="Customer Information" style={{ height: '100%' }}>
+                  <Descriptions column={1} size="small">
+                    <Descriptions.Item label="Name">
+                      <strong>{viewingSalesOrder.Customer?.name || 'N/A'}</strong>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Email">
+                      {viewingSalesOrder.Customer?.email || 'N/A'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Phone">
+                      {viewingSalesOrder.Customer?.phone || 'N/A'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Address">
+                      {viewingSalesOrder.Customer?.address || 'N/A'}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Card>
+              </Col>
+              <Col span={12}>
+                <Card size="small" title="Order Information" style={{ height: '100%' }}>
+                  <Descriptions column={1} size="small">
+                    <Descriptions.Item label="Order Date">
+                      {dayjs(viewingSalesOrder.order_date).format('DD/MM/YYYY')}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Delivery Date">
+                      {viewingSalesOrder.delivery_date ? dayjs(viewingSalesOrder.delivery_date).format('DD/MM/YYYY') : 'N/A'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Status">
+                      <Tag color={getStatusColor(viewingSalesOrder.status)}>
+                        {viewingSalesOrder.status?.toUpperCase()}
+                      </Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Branch">
+                      {viewingSalesOrder.Branch?.name || 'N/A'}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Card>
+              </Col>
+            </Row>
+
+            {viewingSalesOrder.shipping_address && (
+              <Card size="small" title="Shipping Address" style={{ marginBottom: '20px' }}>
+                <p style={{ margin: 0 }}>{viewingSalesOrder.shipping_address}</p>
+              </Card>
+            )}
+
+            <Card size="small" title="Order Items" style={{ marginBottom: '20px' }}>
+              <Table
+                dataSource={viewingSalesOrder.SalesOrderItems || []}
+                pagination={false}
+                size="small"
+                rowKey="id"
+                columns={[
+                  {
+                    title: '#',
+                    key: 'index',
+                    width: 50,
+                    render: (_, __, index) => index + 1
+                  },
+                  {
+                    title: 'Product',
+                    key: 'product',
+                    render: (_, record) => {
+                      const product = record.ProductVariant?.Product;
+                      const variant = record.ProductVariant;
+                      return `${product?.product_name || 'N/A'} - ${variant?.size || ''} - ${variant?.color || ''}`;
+                    }
+                  },
+                  {
+                    title: 'SKU',
+                    dataIndex: ['ProductVariant', 'sku'],
+                    key: 'sku'
+                  },
+                  {
+                    title: 'Quantity',
+                    dataIndex: 'qty',
+                    key: 'qty',
+                    align: 'right',
+                    render: (qty) => parseFloat(qty).toFixed(0)
+                  },
+                  {
+                    title: 'Unit Price',
+                    dataIndex: 'unit_price',
+                    key: 'unit_price',
+                    align: 'right',
+                    render: (price) => `₹${parseFloat(price).toFixed(2)}`
+                  },
+                  {
+                    title: 'Total',
+                    dataIndex: 'total',
+                    key: 'total',
+                    align: 'right',
+                    render: (total) => `₹${parseFloat(total).toFixed(2)}`
+                  }
+                ]}
+                summary={() => {
+                  const totalAmount = parseFloat(viewingSalesOrder.total_amount || 0);
+                  return (
+                    <Table.Summary fixed>
+                      <Table.Summary.Row style={{ backgroundColor: '#fafafa' }}>
+                        <Table.Summary.Cell index={0} colSpan={5} align="right">
+                          <strong>Total Amount:</strong>
+                        </Table.Summary.Cell>
+                        <Table.Summary.Cell index={1} align="right">
+                          <strong style={{ fontSize: '16px', color: '#1890ff' }}>
+                            ₹{totalAmount.toFixed(2)}
+                          </strong>
+                        </Table.Summary.Cell>
+                      </Table.Summary.Row>
+                    </Table.Summary>
+                  );
+                }}
+              />
+            </Card>
+
+            {viewingSalesOrder.notes && (
+              <Card size="small" title="Notes">
+                <p style={{ margin: 0 }}>{viewingSalesOrder.notes}</p>
+              </Card>
+            )}
+
+            <div className="footer" style={{ marginTop: '40px', textAlign: 'center', fontSize: '12px', color: '#666', borderTop: '1px solid #ddd', paddingTop: '20px' }}>
+              <p style={{ margin: '5px 0' }}>This is a computer-generated document. No signature is required.</p>
+              <p style={{ margin: '5px 0' }}>Generated on: {dayjs().format('DD/MM/YYYY HH:mm:ss')}</p>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Customer Creation Modal */}
+      <Modal
+        title="Add New Customer"
+        open={customerModalVisible}
+        onCancel={() => {
+          setCustomerModalVisible(false);
+          customerForm.resetFields();
+        }}
+        footer={null}
+        width={500}
+      >
+        <Form
+          form={customerForm}
+          layout="vertical"
+          onFinish={handleCreateCustomer}
+        >
+          <Form.Item
+            name="name"
+            label="Customer Name"
+            rules={[
+              { required: true, message: 'Please enter customer name' },
+              { min: 2, message: 'Customer name must be at least 2 characters' }
+            ]}
+          >
+            <Input placeholder="Enter customer name" />
+          </Form.Item>
+
+          <Form.Item
+            name="phone"
+            label="Phone Number"
+            rules={[
+              { required: true, message: 'Please enter phone number' },
+              { pattern: /^[0-9]{10}$/, message: 'Please enter a valid 10-digit phone number' }
+            ]}
+          >
+            <Input placeholder="Enter phone number" maxLength={10} />
+          </Form.Item>
+
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { type: 'email', message: 'Please enter a valid email address' }
+            ]}
+          >
+            <Input placeholder="Enter email address (optional)" />
+          </Form.Item>
+
+          <Form.Item
+            name="address"
+            label="Address"
+          >
+            <Input.TextArea placeholder="Enter customer address (optional)" rows={3} />
+          </Form.Item>
+
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => {
+              setCustomerModalVisible(false);
+              customerForm.resetFields();
+            }}>
+              Cancel
+            </Button>
+            <Button type="primary" htmlType="submit">
+              Create Customer
             </Button>
           </div>
         </Form>

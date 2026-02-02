@@ -28,6 +28,7 @@ import {
   RefreshCcw
 } from "lucide-react";
 import { userService, roleService } from "../services";
+import { HelpTooltip } from "../components";
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -168,7 +169,13 @@ const Settings = () => {
           <SettingsIcon size={20} className="text-gray-600" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Settings</h2>
+          <h2 className="text-2xl font-bold text-gray-800">
+            Settings
+            <HelpTooltip 
+              title="System Settings"
+              content="Configure system preferences, user profile settings, security options, and notification preferences. Manage account details, system configurations, and personalize your application experience."
+            />
+          </h2>
           <p className="text-sm text-gray-600">Manage your account and system preferences</p>
         </div>
       </div>

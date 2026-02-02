@@ -29,7 +29,7 @@ import {
 import { bomService, productService, rawMaterialService } from "../services";
 
 const { Option } = Select;
-import { SearchInput } from "../components";
+import { SearchInput, HelpTooltip } from "../components";
 
 const BOM = () => {
   const [boms, setBoms] = useState([]);
@@ -431,7 +431,13 @@ const BOM = () => {
             <FileText size={20} className="text-gray-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Bill of Materials (BOM)</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Bill of Materials (BOM)
+              <HelpTooltip 
+                title="Bill of Materials Management"
+                content="Create and manage BOMs (recipes) for products, defining raw material requirements and quantities needed for production. View detailed BOM breakdowns, calculate material costs, and maintain production specifications for manufacturing."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Manage product recipes and material requirements</p>
           </div>
         </div>

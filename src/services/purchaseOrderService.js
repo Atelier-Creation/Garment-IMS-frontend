@@ -47,5 +47,11 @@ export const purchaseOrderService = {
   deletePurchaseOrder: async (id) => {
     const response = await api.delete(`/purchase-orders/${id}`);
     return response.data;
+  },
+
+  // Cancel purchase order
+  cancelPurchaseOrder: async (id, reason) => {
+    const response = await api.put(`/purchase-orders/${id}/cancel`, { reason });
+    return response.data;
   }
 };

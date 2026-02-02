@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { shipmentService, salesOrderService, customerService } from "../services";
 import dayjs from "dayjs";
+import { HelpTooltip } from "../components";
 
 const { Option } = Select;
 const { Search: AntSearch } = Input;
@@ -302,7 +303,13 @@ const Shipments = () => {
             <Truck size={20} className="text-gray-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Shipments</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Shipments
+              <HelpTooltip 
+                title="Shipments Management"
+                content="Track and manage order shipments including shipping details, tracking numbers, delivery status, and logistics coordination. Monitor shipment progress, update delivery information, and manage shipping workflows."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Track and manage order shipments</p>
           </div>
         </div>

@@ -16,7 +16,7 @@ import {
   InputNumber,
   Tabs
 } from 'antd';
-import { SearchInput } from "../components";
+import { SearchInput, HelpTooltip } from "../components";
 import { 
   PlusOutlined, 
   EditOutlined, 
@@ -283,7 +283,13 @@ const RawMaterials = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Raw Materials</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Raw Materials
+          <HelpTooltip 
+            title="Raw Materials Management"
+            content="Manage raw materials inventory including material details, categories, stock levels, and pricing. Create new materials, track stock movements, view stock history, and maintain material specifications for production and purchasing."
+          />
+        </h1>
         <Button
           type="primary"
           icon={<PlusOutlined />}

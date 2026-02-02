@@ -3,6 +3,7 @@ import { Card, Button, Table, Modal, Form, Input, Select, InputNumber, message, 
 import { PlusOutlined, DeleteOutlined, ShoppingCartOutlined, EyeOutlined, DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
 import { billingService, customerService, productVariantService, branchService } from '../services';
 import dayjs from 'dayjs';
+import { HelpTooltip } from '../components';
 
 const { Option } = Select;
 
@@ -241,7 +242,7 @@ const Billing = () => {
         bill.order_number,
         bill.Customer?.name || 'N/A',
         dayjs(bill.order_date).format('DD/MM/YYYY HH:mm'),
-        bill.SalesOrderItem?.length || 0,
+        bill.SalesOrderItems?.length || 0,
         `₹${parseFloat(bill.subtotal_amount || 0).toFixed(2)}`,
         `₹${parseFloat(bill.tax_amount || 0).toFixed(2)}`,
         `₹${parseFloat(bill.total_amount || 0).toFixed(2)}`,
@@ -275,7 +276,7 @@ const Billing = () => {
 
   const handlePrintBill = (record) => {
     const printWindow = window.open('', '_blank');
-    const items = record.SalesOrderItem || [];
+    const items = record.SalesOrderItems || [];
     
     const printContent = `
       <!DOCTYPE html>
@@ -394,7 +395,7 @@ const Billing = () => {
     },
     {
       title: 'Items',
-      dataIndex: 'SalesOrderItem',
+      dataIndex: 'SalesOrderItems',
       key: 'items',
       render: (items) => items?.length || 0
     },
@@ -490,18 +491,19 @@ const Billing = () => {
 
   return (
     <div className="p-6">
-      {/* Debug info */}
-      <div style={{ background: '#f0f0f0', padding: '10px', marginBottom: '10px', fontSize: '12px' }}>
-        Debug: Billings loaded: {billings.length} | Loading: {loading.toString()} | Total: {pagination.total}
-      </div>
-      
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
             <ShoppingCartOutlined style={{ fontSize: 20, color: '#666' }} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Billing / POS</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Billing / POS
+              <HelpTooltip 
+                title="Billing & Point of Sale"
+                content="Create bills and process point-of-sale transactions. Add products to cart, select customers (or walk-in), apply discounts, and generate invoices. View detailed bill information with customer details and itemized purchases."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Create and manage bills</p>
           </div>
         </div>
@@ -775,17 +777,15 @@ const Billing = () => {
                   {selectedBilling.status}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Customer Name" span={2}>
+              <Descriptions.Item label="Customer Name" span={1}>
                 {selectedBilling.Customer?.name || 'N/A'}
               </Descriptions.Item>
-              <Descriptions.Item label="Contact Person" span={1}>
-                {selectedBilling.Customer?.contact_name || 'N/A'}
-              </Descriptions.Item>
-              <Descriptions.Item label="Phone" span={1}>
-                {selectedBilling.Customer?.phone || 'N/A'}
-              </Descriptions.Item>
-              <Descriptions.Item label="Email" span={2}>
-                {selectedBilling.Customer?.email || 'N/A'}
+              <Descriptions.Item label="Contact Info" span={1}>
+                <div>
+                  {selectedBilling.Customer?.phone && `📞 ${selectedBilling.Customer.phone}`}
+                  {selectedBilling.Customer?.phone && selectedBilling.Customer?.email && ' • '}
+                  {selectedBilling.Customer?.email && `✉️ ${selectedBilling.Customer.email}`}
+                </div>
               </Descriptions.Item>
               <Descriptions.Item label="Order Date" span={1}>
                 {selectedBilling.order_date ? dayjs(selectedBilling.order_date).format('DD/MM/YYYY HH:mm') : 'N/A'}
@@ -851,7 +851,7 @@ const Billing = () => {
                   render: (total) => `₹${parseFloat(total).toFixed(2)}`
                 }
               ]}
-              dataSource={selectedBilling.SalesOrderItem || []}
+              dataSource={selectedBilling.SalesOrderItems || []}
               rowKey="id"
               pagination={false}
               size="small"

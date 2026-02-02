@@ -18,7 +18,7 @@ import { stockService, productService, rawMaterialService } from "../services";
 import api from "../services/api";
 
 const { Option } = Select;
-import { SearchInput } from "../components";
+import { SearchInput, HelpTooltip } from "../components";
 
 const Stock = () => {
   const [stocks, setStocks] = useState([]);
@@ -312,7 +312,13 @@ const Stock = () => {
             <Warehouse size={20} className="text-gray-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Stock Management</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Stock Management
+              <HelpTooltip 
+                title="Stock Management"
+                content="Monitor and manage inventory levels for both finished goods and raw materials. Track stock movements, adjust quantities, view stock history, and manage stock across different locations. Filter by stock type and search for specific items."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Monitor and manage inventory levels</p>
           </div>
         </div>

@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { auditLogService, userService } from "../services";
 import dayjs from "dayjs";
+import { HelpTooltip } from "../components";
 
 const { Option } = Select;
 const { Search: AntSearch } = Input;
@@ -305,7 +306,13 @@ const AuditLogs = () => {
             <Shield size={20} className="text-gray-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Audit Logs</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Audit Logs
+              <HelpTooltip 
+                title="Audit Logs"
+                content="Track and monitor all system activities and user actions for security and compliance. View detailed logs of who did what and when, filter by users, actions, and date ranges. Essential for security auditing and troubleshooting."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Track system activities and user actions</p>
           </div>
         </div>

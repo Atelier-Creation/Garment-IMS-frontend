@@ -32,7 +32,7 @@ import { userService, roleService } from '../services';
 import PermissionGuard from '../components/PermissionGuard';
 
 const { Option } = Select;
-import { SearchInput } from "../components";
+import { SearchInput, HelpTooltip } from "../components";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -304,7 +304,13 @@ const Users = () => {
             <UsersIcon size={20} className="text-gray-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Users</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Users
+              <HelpTooltip 
+                title="User Management"
+                content="Manage system users including creating accounts, assigning roles, updating user information, and controlling access permissions. Change passwords, activate/deactivate users, and maintain user security settings."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Manage system users and their roles</p>
           </div>
         </div>

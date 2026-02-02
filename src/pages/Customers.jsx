@@ -16,7 +16,7 @@ import {
 } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, EyeOutlined } from '@ant-design/icons';
 import { customerService } from '../services';
-import { SearchInput } from "../components";
+import { SearchInput, HelpTooltip } from "../components";
 
 const { Option } = Select;
 
@@ -190,7 +190,13 @@ const Customers = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Customers</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Customers
+          <HelpTooltip 
+            title="Customer Management"
+            content="Manage your customer database including contact information, addresses, and customer types. Create new customers, edit existing ones, and maintain customer relationships. Search and filter customers for easy access during sales and billing."
+          />
+        </h1>
         <Button
           type="primary"
           icon={<PlusOutlined />}
