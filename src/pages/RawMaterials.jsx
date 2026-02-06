@@ -253,24 +253,63 @@ const RawMaterials = () => {
       title: 'Branch',
       dataIndex: ['Branch', 'name'],
       key: 'branch',
-      render: (_, record) => record.Branch?.name || 'N/A'
+      render: (_, record, index) => {
+        // Group by branch - only show branch name for first occurrence
+        const batches = stockData?.batches || [];
+        const currentBranchId = record.branch_id;
+        
+        // Find first index of this branch
+        const firstIndex = batches.findIndex(b => b.branch_id === currentBranchId);
+        
+        // Count how many rows have the same branch
+        const rowSpan = batches.filter(b => b.branch_id === currentBranchId).length;
+        
+        // Only render for the first occurrence
+        if (index === firstIndex) {
+          return {
+            children: <span className="font-medium">{record.Branch?.name || 'N/A'}</span>,
+            props: {
+              rowSpan: rowSpan,
+            },
+          };
+        }
+        
+        // Return empty cell with rowSpan 0 for subsequent rows
+        return {
+          children: null,
+          props: {
+            rowSpan: 0,
+          },
+        };
+      }
     },
     {
-      title: 'Batch Number',
-      dataIndex: 'batchNumber',
-      key: 'batchNumber'
+      title: 'Batch Code',
+      dataIndex: 'batch_code',
+      key: 'batch_code',
+      render: (text) => <span className="font-mono text-sm">{text || 'N/A'}</span>
     },
     {
       title: 'Current Quantity',
-      dataIndex: 'currentQuantity',
-      key: 'currentQuantity',
-      render: (qty, record) => `${qty} ${record.unit || ''}`
+      dataIndex: 'qty',
+      key: 'qty',
+      render: (qty) => (
+        <span className="font-medium">
+          {parseFloat(qty || 0).toFixed(2)} {selectedRawMaterial?.uom || ''}
+        </span>
+      )
     },
     {
-      title: 'Expiry Date',
-      dataIndex: 'expiryDate',
-      key: 'expiryDate',
-      render: (date) => date ? new Date(date).toLocaleDateString() : 'N/A'
+      title: 'Cost Per Unit',
+      dataIndex: 'cost_per_unit',
+      key: 'cost_per_unit',
+      render: (price) => `₹${parseFloat(price || 0).toFixed(2)}`
+    },
+    {
+      title: 'Received Date',
+      dataIndex: 'received_at',
+      key: 'received_at',
+      render: (date) => date ? new Date(date).toLocaleDateString('en-GB') : 'N/A'
     },
     {
       title: 'Supplier',
@@ -449,7 +488,13 @@ const RawMaterials = () => {
                 <Col span={8}>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">
-                      {stockData.totalStock || 0}
+                      {(() => {
+                        // Calculate total stock from batches
+                        const total = stockData.batches?.reduce((sum, batch) => {
+                          return sum + parseFloat(batch.qty || 0);
+                        }, 0) || 0;
+                        return `${total.toFixed(2)} ${selectedRawMaterial?.uom || ''}`;
+                      })()}
                     </div>
                     <div className="text-sm text-gray-600">Total Stock</div>
                   </div>
@@ -465,9 +510,9 @@ const RawMaterials = () => {
                 <Col span={8}>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-orange-600">
-                      ₹{selectedRawMaterial?.unitPrice?.toFixed(2) || '0.00'}
+                      ₹{parseFloat(selectedRawMaterial?.average_cost || 0).toFixed(2)}
                     </div>
-                    <div className="text-sm text-gray-600">Unit Price</div>
+                    <div className="text-sm text-gray-600">Average Cost</div>
                   </div>
                 </Col>
               </Row>
@@ -475,7 +520,12 @@ const RawMaterials = () => {
 
             <Table
               columns={stockColumns}
-              dataSource={stockData.batches || []}
+              dataSource={stockData.batches?.sort((a, b) => {
+                // Sort by branch_id to group same branches together
+                if (a.branch_id < b.branch_id) return -1;
+                if (a.branch_id > b.branch_id) return 1;
+                return 0;
+              }) || []}
               rowKey="id"
               pagination={false}
               size="small"
