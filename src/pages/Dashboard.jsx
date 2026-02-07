@@ -511,16 +511,17 @@ const Dashboard = () => {
           </Link>
           <Link
             to="/sales"
-            className="text-sm !bg-[#E9EDF4] py-2 px-3 !text-gray-700 shadow-sm rounded-sm hover:bg-[#dde1ea] transition-colors"
+            state={{ createSale: true }}
+            className="text-sm !bg-[#52c41a] py-2 px-3 !text-white shadow-sm rounded-sm hover:bg-[#dde1ea] transition-colors"
           >
-            New Order
+            New sales Order
           </Link>
           <Link
             to="/order"
             state={{ createOrder: true }}
-            className="text-sm !bg-[#E9EDF4] py-2 px-3 !text-gray-700 shadow-sm rounded-sm hover:bg-[#dde1ea] transition-colors"
+            className="text-sm !bg-[#faad14] py-2 px-3 !text-white shadow-sm rounded-sm hover:bg-[#dde1ea] transition-colors"
           >
-            Purchase Order
+            New Purchase Order
           </Link>
         </div>
       </div>

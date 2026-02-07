@@ -6,6 +6,7 @@ import { salesOrderService, customerService, productService } from "../services"
 import api from "../services/api";
 import dayjs from "dayjs";
 import { HelpTooltip } from "../components";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -25,6 +26,18 @@ const SalesOrders = () => {
   const [customerModalVisible, setCustomerModalVisible] = useState(false);
   const [customerForm] = Form.useForm();
   const printRef = useRef();
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.createSale) {
+      setIsModalVisible(true);
+      form.resetFields();
+      setSelectedItems([]);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate, form]);
 
   useEffect(() => {
     fetchOrders();
@@ -170,7 +183,7 @@ const SalesOrders = () => {
         shipped_items,
         shipping_date: new Date().toISOString()
       });
-      
+
       if (response.success) {
         message.success("Sales order processed");
         fetchOrders();
@@ -240,10 +253,10 @@ const SalesOrders = () => {
 
   const handleExportExcel = () => {
     if (!viewingSalesOrder) return;
-    
+
     const so = viewingSalesOrder;
     let csvContent = "data:text/csv;charset=utf-8,";
-    
+
     // Header
     csvContent += "Sales Order\n\n";
     csvContent += `Order Number:,${so.order_number}\n`;
@@ -251,7 +264,7 @@ const SalesOrders = () => {
     csvContent += `Order Date:,${dayjs(so.order_date).format('DD/MM/YYYY')}\n`;
     csvContent += `Delivery Date:,${so.delivery_date ? dayjs(so.delivery_date).format('DD/MM/YYYY') : 'N/A'}\n`;
     csvContent += `Status:,${so.status}\n\n`;
-    
+
     // Items
     csvContent += "Item,Product,Quantity,Unit Price,Total\n";
     so.SalesOrderItems?.forEach((item, index) => {
@@ -261,9 +274,9 @@ const SalesOrders = () => {
       csvContent += `${item.unit_price},`;
       csvContent += `${item.total}\n`;
     });
-    
+
     csvContent += `\nTotal Amount:,,,${so.total_amount}\n`;
-    
+
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -271,7 +284,7 @@ const SalesOrders = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     message.success('Sales order exported successfully');
   };
 
@@ -282,10 +295,10 @@ const SalesOrders = () => {
         message.success('Customer created successfully');
         setCustomerModalVisible(false);
         customerForm.resetFields();
-        
+
         // Refresh customers list
         await fetchCustomers();
-        
+
         // Auto-select the newly created customer
         if (response.data && response.data.customer) {
           form.setFieldsValue({ customer_id: response.data.customer.id });
@@ -315,11 +328,11 @@ const SalesOrders = () => {
       key: "order_number",
       render: (text, record) => (
         <Tooltip title="Click to view sales order details">
-          <Button 
-            type="link" 
+          <Button
+            type="link"
             className="font-mono text-sm p-0 h-auto"
             onClick={() => handleView(record)}
-            style={{ 
+            style={{
               textDecoration: 'underline',
               color: '#1890ff',
               fontWeight: 'bold',
@@ -461,7 +474,7 @@ const SalesOrders = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Sales Orders
-              <HelpTooltip 
+              <HelpTooltip
                 title="Sales Orders Management"
                 content="Create and manage customer sales orders. Add customers directly from the form, select products with variants, track order status, and view detailed order information. Click order numbers to view complete order details with export options."
               />
@@ -507,31 +520,31 @@ const SalesOrders = () => {
             rules={[{ required: true, message: "Please select customer" }]}
           >
             <div className="flex gap-2">
-              <Select 
-                placeholder="Search customers by name, phone, or email..." 
+              <Select
+                placeholder="Search customers by name, phone, or email..."
                 showSearch
                 style={{ flex: 1 }}
                 filterOption={(input, option) => {
                   const customer = customers.find(c => c.id === option.value);
                   if (!customer) return false;
-                  
+
                   const searchText = input.toLowerCase();
                   const name = (customer.name || '').toLowerCase();
                   const phone = (customer.phone || '').toLowerCase();
                   const email = (customer.email || '').toLowerCase();
                   const address = (customer.address || '').toLowerCase();
-                  
-                  return name.includes(searchText) || 
-                         phone.includes(searchText) || 
-                         email.includes(searchText) ||
-                         address.includes(searchText);
+
+                  return name.includes(searchText) ||
+                    phone.includes(searchText) ||
+                    email.includes(searchText) ||
+                    address.includes(searchText);
                 }}
                 optionFilterProp="children"
                 notFoundContent={
                   <div className="text-center py-2">
                     <div style={{ color: '#666', marginBottom: '8px' }}>No customers found</div>
-                    <Button 
-                      type="link" 
+                    <Button
+                      type="link"
                       size="small"
                       onClick={() => setCustomerModalVisible(true)}
                     >
@@ -594,8 +607,8 @@ const SalesOrders = () => {
             <h3 className="font-semibold mb-3">Add Items</h3>
             <div className="grid grid-cols-4 gap-2 mb-2">
               <Form.Item name="variant_id" className="mb-0">
-                <Select 
-                  placeholder="Select product" 
+                <Select
+                  placeholder="Select product"
                   showSearch
                   filterOption={(input, option) =>
                     option.children.toLowerCase().includes(input.toLowerCase())
