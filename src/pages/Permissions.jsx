@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { permissionService } from "../services";
 import PermissionGuard from "../components/PermissionGuard";
+import { HelpTooltip } from "../components";
 
 const { Search: AntSearch } = Input;
 const { TextArea } = Input;
@@ -205,7 +206,13 @@ const Permissions = () => {
             <Shield size={20} className="text-gray-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Permissions</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Permissions
+              <HelpTooltip 
+                title="Permissions Management"
+                content="Define and manage system permissions that control access to features and data. Create granular permissions for different modules, actions, and resources. Permissions are assigned to roles to control user access."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Manage system permissions and access controls</p>
           </div>
         </div>

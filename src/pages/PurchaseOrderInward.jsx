@@ -31,6 +31,7 @@ import {
 } from '@ant-design/icons';
 import { purchaseOrderInwardService } from '../services';
 import moment from 'moment';
+import { HelpTooltip } from '../components';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -280,7 +281,13 @@ const PurchaseOrderInward = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <Title level={2} className="text-gray-800 mb-0">Purchase Order Inward</Title>
+        <Title level={2} className="text-gray-800 mb-0">
+          Purchase Order Inward
+          <HelpTooltip 
+            title="Purchase Order Inward"
+            content="Process incoming purchase orders by recording received quantities, updating stock levels, and managing inward transactions. Track delivery status, verify quantities, and maintain accurate inventory records for received materials."
+          />
+        </Title>
       </div>
 
       {/* Summary Cards */}

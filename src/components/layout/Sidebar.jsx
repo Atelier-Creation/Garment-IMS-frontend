@@ -99,7 +99,6 @@ export default function Sidebar({
       permissions: ["purchase.read", "sales.read", "production.read"],
       children: [
         { to: "/order", label: "Purchase Orders", permissions: ["purchase.read"] },
-        { to: "/purchase-inward", label: "Purchase Inward", permissions: ["purchase.receive"] },
         { to: "/sales", label: "Sales Orders", permissions: ["sales.read"] },
         { to: "/billing", label: "Billing / POS", permissions: ["billing:read", "sales.read"] },
         { to: "/production", label: "Production Orders", permissions: ["production.read"] },

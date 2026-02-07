@@ -22,7 +22,8 @@ import {
   Typography,
   notification,
   Descriptions,
-  Dropdown
+  Dropdown,
+  Tooltip
 } from 'antd';
 import { 
   PlusOutlined, 
@@ -41,6 +42,7 @@ import {
 import { purchaseOrderService, supplierService, rawMaterialService } from '../services';
 import api from '../services/api';
 import moment from 'moment';
+import { HelpTooltip } from '../components';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -57,7 +59,9 @@ const PurchaseOrders = () => {
   const [receiveModalVisible, setReceiveModalVisible] = useState(false);
   const [rawMaterialModalVisible, setRawMaterialModalVisible] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [viewingPurchaseOrder, setViewingPurchaseOrder] = useState(null);
+  const [cancellingPurchaseOrder, setCancellingPurchaseOrder] = useState(null);
   const printRef = useRef();
 
   const [editingPurchaseOrder, setEditingPurchaseOrder] = useState(null);
@@ -72,6 +76,7 @@ const PurchaseOrders = () => {
   const [form] = Form.useForm();
   const [receiveForm] = Form.useForm();
   const [rawMaterialForm] = Form.useForm();
+  const [cancelForm] = Form.useForm();
 
   useEffect(() => {
     fetchPurchaseOrders();
@@ -232,19 +237,28 @@ const PurchaseOrders = () => {
       const transformedData = {
         received_items: values.items?.map(item => ({
           item_id: item.purchaseOrderItemId,
-          received_quantity: item.receivedQuantity
+          received_quantity: parseFloat(item.receivedQuantity) || 0
         }))
       };
       
-      await purchaseOrderService.receivePurchaseOrder(selectedPurchaseOrder.id, transformedData);
+      const response = await purchaseOrderService.receivePurchaseOrder(selectedPurchaseOrder.id, transformedData);
+      
       message.success('Purchase order received successfully');
       setReceiveModalVisible(false);
       setSelectedPurchaseOrder(null);
       receiveForm.resetFields();
       fetchPurchaseOrders();
+      
+      // If the view modal is open for the same order, refresh it
+      if (viewingPurchaseOrder?.id === selectedPurchaseOrder.id) {
+        const updatedResponse = await purchaseOrderService.getPurchaseOrderById(selectedPurchaseOrder.id);
+        if (updatedResponse.success) {
+          setViewingPurchaseOrder(updatedResponse.data.purchase_order);
+        }
+      }
     } catch (error) {
-      message.error('Failed to receive purchase order');
       console.error('Error receiving purchase order:', error);
+      message.error('Failed to receive purchase order');
     }
   };
 
@@ -293,6 +307,41 @@ const PurchaseOrders = () => {
         duration: 4
       });
       console.error('Error deleting purchase order:', error);
+    }
+  };
+
+  const handleCancel = async (values) => {
+    try {
+      const response = await purchaseOrderService.cancelPurchaseOrder(
+        cancellingPurchaseOrder.id, 
+        values.reason
+      );
+      if (response.success) {
+        notification.success({
+          message: 'Success',
+          description: 'Purchase order cancelled successfully',
+          placement: 'topRight',
+          duration: 3
+        });
+        setCancelModalVisible(false);
+        setCancellingPurchaseOrder(null);
+        cancelForm.resetFields();
+        fetchPurchaseOrders();
+        // Close view modal if it's open for the same order
+        if (viewingPurchaseOrder?.id === cancellingPurchaseOrder.id) {
+          setViewModalVisible(false);
+          setViewingPurchaseOrder(null);
+        }
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to cancel purchase order';
+      notification.error({
+        message: 'Error',
+        description: errorMessage,
+        placement: 'topRight',
+        duration: 4
+      });
+      console.error('Error cancelling purchase order:', error);
     }
   };
 
@@ -384,6 +433,12 @@ const PurchaseOrders = () => {
     return colors[status?.toUpperCase()] || 'default';
   };
 
+  const hasReceivedItems = (purchaseOrder) => {
+    return purchaseOrder?.PurchaseOrderItems?.some(item => 
+      item.received_quantity && item.received_quantity > 0
+    );
+  };
+
   const handleView = async (record) => {
     try {
       const response = await purchaseOrderService.getPurchaseOrderById(record.id);
@@ -472,7 +527,23 @@ const PurchaseOrders = () => {
       title: 'Order Number',
       dataIndex: 'po_number',
       key: 'po_number',
-      render: (text) => <span className="font-mono text-sm">{text}</span>
+      render: (text, record) => (
+        <Tooltip title="Click to view purchase order details">
+          <Button 
+            type="link" 
+            className="font-mono text-sm p-0 h-auto"
+            onClick={() => handleView(record)}
+            style={{ 
+              textDecoration: 'underline',
+              color: '#1890ff',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
+          >
+            {text}
+          </Button>
+        </Tooltip>
+      )
     },
     {
       title: 'Supplier',
@@ -543,6 +614,19 @@ const PurchaseOrders = () => {
               Receive
             </Button>
           )}
+          {['DRAFT', 'PLACED'].includes(record.status?.toUpperCase()) && !hasReceivedItems(record) && (
+            <Button
+              type="link"
+              danger
+              icon={<ExclamationCircleOutlined />}
+              onClick={() => {
+                setCancellingPurchaseOrder(record);
+                setCancelModalVisible(true);
+              }}
+            >
+              Cancel
+            </Button>
+          )}
           {record.status?.toUpperCase() === 'DRAFT' && (
             <>
               <Button
@@ -572,7 +656,13 @@ const PurchaseOrders = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Purchase Orders</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Purchase Orders
+          <HelpTooltip 
+            title="Purchase Orders Management"
+            content="Create and manage purchase orders for raw materials from suppliers. Track order status from draft to received, view detailed order information, receive items with quantity tracking, and cancel orders when needed. Click order numbers to view full details."
+          />
+        </h1>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -861,7 +951,10 @@ const PurchaseOrders = () => {
                         <InputNumber
                           placeholder="Received Quantity"
                           style={{ width: '100%' }}
-                          min={0.01}
+                          min={0}
+                          step={1}
+                          precision={2}
+                          parser={value => value.replace(/[^\d.]/g, '')}
                         />
                       </Form.Item>
                     </Col>
@@ -1020,7 +1113,18 @@ const PurchaseOrders = () => {
 
       {/* View Purchase Order Modal */}
       <Modal
-        title={null}
+        title={
+          <div style={{ textAlign: 'center' }}>
+            <Title level={3} style={{ margin: 0, color: '#1890ff' }}>
+              Purchase Order Details
+            </Title>
+            {viewingPurchaseOrder && (
+              <Text type="secondary" style={{ fontSize: '14px' }}>
+                Order Number: {viewingPurchaseOrder.po_number}
+              </Text>
+            )}
+          </div>
+        }
         open={viewModalVisible}
         onCancel={() => setViewModalVisible(false)}
         width={900}
@@ -1034,6 +1138,19 @@ const PurchaseOrders = () => {
           <Button key="excel" icon={<FileExcelOutlined />} onClick={handleExportExcel}>
             Export Excel
           </Button>,
+          ...(viewingPurchaseOrder && ['DRAFT', 'PLACED'].includes(viewingPurchaseOrder.status?.toUpperCase()) && !hasReceivedItems(viewingPurchaseOrder) ? [
+            <Button 
+              key="cancel" 
+              danger 
+              icon={<ExclamationCircleOutlined />}
+              onClick={() => {
+                setCancellingPurchaseOrder(viewingPurchaseOrder);
+                setCancelModalVisible(true);
+              }}
+            >
+              Cancel Order
+            </Button>
+          ] : []),
           <Button key="close" onClick={() => setViewModalVisible(false)}>
             Close
           </Button>
@@ -1118,11 +1235,52 @@ const PurchaseOrders = () => {
                     key: 'uom'
                   },
                   {
-                    title: 'Quantity',
+                    title: 'Ordered Qty',
                     dataIndex: 'qty',
                     key: 'qty',
                     align: 'right',
                     render: (qty) => parseFloat(qty).toFixed(2)
+                  },
+                  {
+                    title: 'Received Qty',
+                    dataIndex: 'received_quantity',
+                    key: 'received_quantity',
+                    align: 'right',
+                    render: (receivedQty, record) => {
+                      const received = parseFloat(receivedQty || 0);
+                      const ordered = parseFloat(record.qty);
+                      const isComplete = received >= ordered;
+                      const isPartial = received > 0 && received < ordered;
+                      
+                      return (
+                        <span style={{ 
+                          color: isComplete ? '#52c41a' : isPartial ? '#fa8c16' : '#666',
+                          fontWeight: received > 0 ? 'bold' : 'normal'
+                        }}>
+                          {received.toFixed(2)}
+                          {isComplete && ' ✓'}
+                          {isPartial && ' ⚠'}
+                        </span>
+                      );
+                    }
+                  },
+                  {
+                    title: 'Pending Qty',
+                    key: 'pending_qty',
+                    align: 'right',
+                    render: (_, record) => {
+                      const ordered = parseFloat(record.qty);
+                      const received = parseFloat(record.received_quantity || 0);
+                      const pending = ordered - received;
+                      return (
+                        <span style={{ 
+                          color: pending > 0 ? '#fa8c16' : '#52c41a',
+                          fontWeight: pending > 0 ? 'bold' : 'normal'
+                        }}>
+                          {pending.toFixed(2)}
+                        </span>
+                      );
+                    }
                   },
                   {
                     title: 'Unit Price',
@@ -1140,23 +1298,48 @@ const PurchaseOrders = () => {
                   },
                   {
                     title: 'Total',
-                    dataIndex: 'total',
-                    key: 'total',
+                    key: 'total_received',
                     align: 'right',
-                    render: (total) => `₹${parseFloat(total).toFixed(2)}`
+                    render: (_, record) => {
+                      const receivedQty = parseFloat(record.received_quantity || 0);
+                      const unitPrice = parseFloat(record.unit_price || 0);
+                      const tax = parseFloat(record.tax || 0);
+                      const totalReceived = (receivedQty * unitPrice) + tax;
+                      return `₹${totalReceived.toFixed(2)}`;
+                    }
                   }
                 ]}
                 summary={(pageData) => {
-                  const totalAmount = parseFloat(viewingPurchaseOrder.total_amount || 0);
+                  // Calculate total amount based on received quantities
+                  const totalReceivedAmount = viewingPurchaseOrder.PurchaseOrderItems?.reduce((sum, item) => {
+                    const receivedQty = parseFloat(item.received_quantity || 0);
+                    const unitPrice = parseFloat(item.unit_price || 0);
+                    const tax = parseFloat(item.tax || 0);
+                    return sum + (receivedQty * unitPrice) + tax;
+                  }, 0) || 0;
+
+                  // Calculate total ordered amount for comparison
+                  const totalOrderedAmount = parseFloat(viewingPurchaseOrder.total_amount || 0);
+                  
                   return (
                     <Table.Summary fixed>
+                      <Table.Summary.Row style={{ backgroundColor: '#f5f5f5' }}>
+                        <Table.Summary.Cell index={0} colSpan={9} align="right">
+                          <span>Total Ordered Amount:</span>
+                        </Table.Summary.Cell>
+                        <Table.Summary.Cell index={1} align="right">
+                          <span style={{ fontSize: '14px', color: '#666' }}>
+                            ₹{totalOrderedAmount.toFixed(2)}
+                          </span>
+                        </Table.Summary.Cell>
+                      </Table.Summary.Row>
                       <Table.Summary.Row style={{ backgroundColor: '#fafafa' }}>
-                        <Table.Summary.Cell index={0} colSpan={7} align="right">
-                          <strong>Total Amount:</strong>
+                        <Table.Summary.Cell index={0} colSpan={9} align="right">
+                          <strong>Total Received Amount:</strong>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={1} align="right">
                           <strong style={{ fontSize: '16px', color: '#1890ff' }}>
-                            ₹{totalAmount.toFixed(2)}
+                            ₹{totalReceivedAmount.toFixed(2)}
                           </strong>
                         </Table.Summary.Cell>
                       </Table.Summary.Row>
@@ -1178,6 +1361,83 @@ const PurchaseOrders = () => {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Cancel Purchase Order Modal */}
+      <Modal
+        title="Cancel Purchase Order"
+        open={cancelModalVisible}
+        onCancel={() => {
+          setCancelModalVisible(false);
+          setCancellingPurchaseOrder(null);
+          cancelForm.resetFields();
+        }}
+        footer={null}
+        width={500}
+      >
+        <Alert
+          message="Warning"
+          description="Cancelling this purchase order will permanently change its status to CANCELLED. This action cannot be undone."
+          type="warning"
+          showIcon
+          className="mb-4"
+        />
+        
+        {cancellingPurchaseOrder && (
+          <div className="mb-4">
+            <Descriptions column={1} size="small" bordered>
+              <Descriptions.Item label="Order Number">
+                <strong>{cancellingPurchaseOrder.po_number}</strong>
+              </Descriptions.Item>
+              <Descriptions.Item label="Supplier">
+                {cancellingPurchaseOrder.Supplier?.name || 'N/A'}
+              </Descriptions.Item>
+              <Descriptions.Item label="Total Amount">
+                ₹{parseFloat(cancellingPurchaseOrder.total_amount || 0).toFixed(2)}
+              </Descriptions.Item>
+              <Descriptions.Item label="Status">
+                <Tag color={getStatusColor(cancellingPurchaseOrder.status)}>
+                  {cancellingPurchaseOrder.status?.toUpperCase()}
+                </Tag>
+              </Descriptions.Item>
+            </Descriptions>
+          </div>
+        )}
+
+        <Form
+          form={cancelForm}
+          layout="vertical"
+          onFinish={handleCancel}
+        >
+          <Form.Item
+            name="reason"
+            label="Cancellation Reason"
+            rules={[
+              { required: true, message: 'Please provide a reason for cancellation' },
+              { min: 10, message: 'Reason must be at least 10 characters long' }
+            ]}
+          >
+            <Input.TextArea 
+              rows={4} 
+              placeholder="Please provide a detailed reason for cancelling this purchase order..."
+              maxLength={500}
+              showCount
+            />
+          </Form.Item>
+
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => {
+              setCancelModalVisible(false);
+              setCancellingPurchaseOrder(null);
+              cancelForm.resetFields();
+            }}>
+              Keep Order
+            </Button>
+            <Button type="primary" danger htmlType="submit">
+              Cancel Order
+            </Button>
+          </div>
+        </Form>
       </Modal>
     </div>
   );

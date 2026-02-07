@@ -29,7 +29,7 @@ import {
 import { branchService } from "../services";
 
 const { Option } = Select;
-import { SearchInput } from "../components";
+import { SearchInput, HelpTooltip } from "../components";
 const { TextArea } = Input;
 
 const Branches = () => {
@@ -267,7 +267,13 @@ const Branches = () => {
             <Building2 size={20} className="text-gray-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Branch Management</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Branch Management
+              <HelpTooltip 
+                title="Branch Management"
+                content="Manage company branches and locations including branch details, contact information, and operational settings. Create new branches, update existing ones, and organize multi-location business operations."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Manage company branches and locations</p>
           </div>
         </div>

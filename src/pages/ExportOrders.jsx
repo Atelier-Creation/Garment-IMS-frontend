@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Table, Modal, Form, Select, InputNumber, Input, message, Tag, Space } from "antd";
+import { Card, Button, Table, Modal, Form, Select, InputNumber, Input, message, Tag, Space, Row, Col } from "antd";
+import { PlusOutlined } from '@ant-design/icons';
 import { Globe, Plus } from "lucide-react";
 import { exportOrderService, customerService, productVariantService } from "../services";
+import { HelpTooltip } from "../components";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -10,7 +12,9 @@ const ExportOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [customerModalVisible, setCustomerModalVisible] = useState(false);
   const [form] = Form.useForm();
+  const [customerForm] = Form.useForm();
   const [customers, setCustomers] = useState([]);
   const [variants, setVariants] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -123,6 +127,33 @@ const ExportOrders = () => {
     } catch (error) {
       message.error(error.response?.data?.message || "Failed to update status");
     }
+  };
+
+  // Handle customer creation
+  const handleCreateCustomer = async (values) => {
+    try {
+      const response = await customerService.createCustomer(values);
+      if (response.success) {
+        message.success('Customer created successfully');
+        setCustomerModalVisible(false);
+        customerForm.resetFields();
+        await fetchCustomers(); // Refresh customers list
+        
+        // Auto-select the newly created customer
+        if (response.data && response.data.id) {
+          form.setFieldsValue({ customer_id: response.data.id });
+        }
+      }
+    } catch (error) {
+      message.error('Failed to create customer');
+      console.error('Error creating customer:', error);
+    }
+  };
+
+  // Open customer creation modal
+  const openCustomerModal = () => {
+    customerForm.resetFields();
+    setCustomerModalVisible(true);
   };
 
   const getStatusColor = (status) => {
@@ -240,7 +271,13 @@ const ExportOrders = () => {
             <Globe size={20} className="text-gray-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Export Orders</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Export Orders
+              <HelpTooltip 
+                title="Export Orders Management"
+                content="Manage international export orders including customer details, product variants, shipping information, and export documentation. Track order status, manage export compliance, and coordinate international shipments."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Manage international orders</p>
           </div>
         </div>
@@ -281,13 +318,58 @@ const ExportOrders = () => {
             label="Customer"
             rules={[{ required: true, message: "Please select customer" }]}
           >
-            <Select placeholder="Select customer" showSearch>
-              {customers.map((customer) => (
-                <Option key={customer.id} value={customer.id}>
-                  {customer.name}
-                </Option>
-              ))}
-            </Select>
+            <div className="flex gap-2">
+              <Select 
+                placeholder="Select customer" 
+                showSearch
+                style={{ flex: 1 }}
+                filterOption={(input, option) => {
+                  const customer = customers.find(c => c.id === option.value);
+                  if (!customer) return false;
+                  
+                  const searchText = input.toLowerCase();
+                  return (
+                    customer.name?.toLowerCase().includes(searchText) ||
+                    customer.phone?.toLowerCase().includes(searchText) ||
+                    customer.email?.toLowerCase().includes(searchText) ||
+                    customer.address?.toLowerCase().includes(searchText)
+                  );
+                }}
+                optionRender={(option) => {
+                  const customer = customers.find(c => c.id === option.value);
+                  if (!customer) return option.label;
+                  
+                  return (
+                    <div>
+                      <div style={{ fontWeight: 'bold' }}>{customer.name}</div>
+                      <div style={{ fontSize: '12px', color: '#666' }}>
+                        {customer.phone && `📞 ${customer.phone}`}
+                        {customer.email && ` | ✉️ ${customer.email}`}
+                      </div>
+                      {customer.address && (
+                        <div style={{ fontSize: '11px', color: '#999' }}>
+                          📍 {customer.address}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }}
+              >
+                {customers.map((customer) => (
+                  <Option key={customer.id} value={customer.id}>
+                    {customer.name}
+                  </Option>
+                ))}
+              </Select>
+              <Button
+                type="dashed"
+                icon={<PlusOutlined />}
+                onClick={openCustomerModal}
+                title="Add new customer"
+              >
+                Add
+              </Button>
+            </div>
           </Form.Item>
 
           <div className="grid grid-cols-2 gap-4">
@@ -375,6 +457,134 @@ const ExportOrders = () => {
             <Button onClick={() => setIsModalVisible(false)}>Cancel</Button>
             <Button type="primary" htmlType="submit">
               Create Order
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* Customer Creation Modal */}
+      <Modal
+        title="Add New Customer"
+        open={customerModalVisible}
+        onCancel={() => {
+          setCustomerModalVisible(false);
+          customerForm.resetFields();
+        }}
+        footer={null}
+        width={600}
+      >
+        <Form
+          form={customerForm}
+          layout="vertical"
+          onFinish={handleCreateCustomer}
+        >
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="name"
+                label="Customer Name"
+                rules={[
+                  { required: true, message: 'Please enter customer name' },
+                  { min: 2, message: 'Customer name must be at least 2 characters' }
+                ]}
+              >
+                <Input placeholder="Enter customer name" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="phone"
+                label="Phone Number"
+                rules={[
+                  { required: true, message: 'Please enter phone number' },
+                  { pattern: /^[0-9+\-\s()]+$/, message: 'Please enter a valid phone number' }
+                ]}
+              >
+                <Input placeholder="Enter phone number" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="email"
+                label="Email"
+                rules={[
+                  { type: 'email', message: 'Please enter a valid email address' }
+                ]}
+              >
+                <Input placeholder="Enter email address (optional)" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="customer_type"
+                label="Customer Type"
+                initialValue="EXPORT"
+              >
+                <Select>
+                  <Option value="REGULAR">Regular</Option>
+                  <Option value="WHOLESALE">Wholesale</Option>
+                  <Option value="EXPORT">Export</Option>
+                  <Option value="RETAIL">Retail</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item
+            name="address"
+            label="Address"
+            rules={[
+              { required: true, message: 'Please enter customer address' }
+            ]}
+          >
+            <Input.TextArea 
+              placeholder="Enter customer address" 
+              rows={3}
+            />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="city"
+                label="City"
+              >
+                <Input placeholder="Enter city" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="country"
+                label="Country"
+                initialValue="India"
+              >
+                <Input placeholder="Enter country" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item
+            name="notes"
+            label="Notes"
+          >
+            <Input.TextArea 
+              placeholder="Enter any additional notes (optional)" 
+              rows={2}
+            />
+          </Form.Item>
+
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => {
+              setCustomerModalVisible(false);
+              customerForm.resetFields();
+            }}>
+              Cancel
+            </Button>
+            <Button type="primary" htmlType="submit">
+              Create Customer
             </Button>
           </div>
         </Form>

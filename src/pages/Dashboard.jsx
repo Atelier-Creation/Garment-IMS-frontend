@@ -13,7 +13,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { reportService } from "../services";
-import { StatCard } from "../components";
+import { StatCard, HelpTooltip } from "../components";
 
 // Import GIF icons
 const RevenueGrowth = "/revenue-growth.gif";
@@ -201,6 +201,27 @@ const Dashboard = () => {
   const [lastUpdated, setLastUpdated] = useState("");
   const [dashboardTitle, setDashboardTitle] = useState("Dashboard");
 
+  // Helper function to format currency based on screen size
+  const formatCurrency = (amount, isCompact = false) => {
+    const numAmount = parseFloat(amount || 0);
+    
+    if (isCompact) {
+      // For tablet/mobile view - abbreviated format
+      if (numAmount >= 10000000) { // 1 crore+
+        return `₹${(numAmount / 10000000).toFixed(1)}Cr`;
+      } else if (numAmount >= 100000) { // 1 lakh+
+        return `₹${(numAmount / 100000).toFixed(1)}L`;
+      } else if (numAmount >= 1000) { // 1 thousand+
+        return `₹${(numAmount / 1000).toFixed(0)}k`;
+      } else {
+        return `₹${numAmount.toFixed(0)}`;
+      }
+    } else {
+      // For desktop view - whole numbers without decimals
+      return `₹${numAmount.toFixed(0)}`;
+    }
+  };
+
   const updateTimestamp = () => {
     const now = new Date();
     const formatted =
@@ -356,7 +377,12 @@ const Dashboard = () => {
     {
       id: "revenue",
       title: "This Month Revenue",
-      value: `₹${(summary.totalRevenue ?? 0).toLocaleString()}`,
+      value: (
+        <>
+          <span className="hidden md:inline">{formatCurrency(summary.totalRevenue, false)}</span>
+          <span className="md:hidden">{formatCurrency(summary.totalRevenue, true)}</span>
+        </>
+      ),
       // percentage: summary.totalRevenue > 0 ? 12.8 : 0,
       meta: "Revenue this month",
       icon: <img src={RevenueGrowth} alt="Revenue Growth" className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 object-contain" />,
@@ -381,22 +407,22 @@ const Dashboard = () => {
     {
       title: "Pending Sales",
       value: summary.originalData?.pending_orders?.sales ?? 0,
-      linkTo: "/sales-orders"
+      linkTo: "/sales"
     },
     {
       title: "Pending Purchases",
       value: summary.originalData?.pending_orders?.purchase ?? 0,
-      linkTo: "/purchase-orders"
+      linkTo: "/order"
     },
     {
       title: "Pending Production",
       value: summary.originalData?.pending_orders?.production ?? 0,
-      linkTo: "/production-orders"
+      linkTo: "/production"
     },
     {
       title: "Low Stock Alerts",
       value: summary.lowStockItems ?? 0,
-      linkTo: "/stock"
+      linkTo: "/stock/list"
     }
   ];
 
@@ -406,6 +432,10 @@ const Dashboard = () => {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1" style={{ fontWeight: "700" }}>
             {dashboardTitle}
+            <HelpTooltip 
+              title="Dashboard Overview"
+              content="This is your main dashboard showing key business metrics, recent activities, and system status. View production stats, sales data, stock levels, and quick access to important functions. Charts provide visual insights into your business performance."
+            />
           </h1>
           <Text style={{ fontSize: 12, color: "#6b7280" }}>
             Last updated: {lastUpdated || "—"}

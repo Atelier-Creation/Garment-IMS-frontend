@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Modal, Form, Input, message, Space, Popconfirm, Tag, Select } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons';
 import api from '../services/api';
+import { HelpTooltip } from '../components';
 
 const { Option } = Select;
 
@@ -232,7 +233,13 @@ const Categories = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Categories</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Categories
+          <HelpTooltip 
+            title="Categories Management"
+            content="Organize products and materials using categories and subcategories. Create hierarchical classification systems, manage category relationships, and maintain organized product catalogs for better inventory management."
+          />
+        </h1>
         <Button
           type="primary"
           icon={<PlusOutlined />}

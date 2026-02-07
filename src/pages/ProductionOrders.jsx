@@ -4,6 +4,7 @@ import { Factory, Plus, Eye, Play, CheckCircle, XCircle } from "lucide-react";
 import { productionOrderService, productService, bomService } from "../services";
 import api from "../services/api";
 import dayjs from "dayjs";
+import { HelpTooltip } from "../components";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -72,8 +73,8 @@ const ProductionOrders = () => {
       }
       
       // Fetch variants for the product
-      const variantsResponse = await api.get("/product-variants", {
-        params: { product_id: productId, limit: 1000 }
+      const variantsResponse = await api.get(`/product-variants/product/${productId}`, {
+        params: { limit: 1000 }
       });
       if (variantsResponse.data.success) {
         setVariants(variantsResponse.data.data.productVariants || []);
@@ -287,7 +288,13 @@ const ProductionOrders = () => {
             <Factory size={20} className="text-gray-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Production Orders</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Production Orders
+              <HelpTooltip 
+                title="Production Orders Management"
+                content="Create and manage production orders for manufacturing products. Plan production schedules, track order status from planned to completed, manage raw material consumption, and record production output. Links with BOM for material requirements."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Manage production workflow</p>
           </div>
         </div>

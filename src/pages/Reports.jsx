@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { reportService } from "../services";
 import dayjs from "dayjs";
+import { HelpTooltip } from "../components";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -328,7 +329,13 @@ const Reports = () => {
             <BarChart3 size={20} className="text-gray-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Reports & Analytics</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Reports & Analytics
+              <HelpTooltip 
+                title="Reports & Analytics"
+                content="Generate comprehensive business reports including sales, purchase, production, and stock reports. Filter by date ranges, analyze trends, view summary statistics, and export reports for business insights and decision making."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Generate comprehensive business reports</p>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { Card, Button, Table, Modal, Form, Input, Select, InputNumber, message, 
 import { PlusOutlined, DeleteOutlined, ShoppingCartOutlined, EyeOutlined, DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
 import { billingService, customerService, productVariantService, branchService } from '../services';
 import dayjs from 'dayjs';
+import { HelpTooltip } from '../components';
 
 const { Option } = Select;
 
@@ -35,7 +36,6 @@ const Billing = () => {
         limit: pagination.pageSize
       });
       
-      // billingService returns response.data directly
       if (response && response.success) {
         const billingsData = response.data || [];
         setBillings(billingsData);
@@ -43,10 +43,13 @@ const Billing = () => {
           ...prev,
           total: response.total || 0
         }));
+      } else {
+        setBillings([]);
       }
     } catch (error) {
       console.error('Fetch billings error:', error);
       message.error(error.response?.data?.message || 'Failed to load billings');
+      setBillings([]);
     } finally {
       setLoading(false);
     }
@@ -494,7 +497,13 @@ const Billing = () => {
             <ShoppingCartOutlined style={{ fontSize: 20, color: '#666' }} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Billing / POS</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Billing / POS
+              <HelpTooltip 
+                title="Billing & Point of Sale"
+                content="Create bills and process point-of-sale transactions. Add products to cart, select customers (or walk-in), apply discounts, and generate invoices. View detailed bill information with customer details and itemized purchases."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Create and manage bills</p>
           </div>
         </div>
@@ -768,17 +777,15 @@ const Billing = () => {
                   {selectedBilling.status}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Customer Name" span={2}>
+              <Descriptions.Item label="Customer Name" span={1}>
                 {selectedBilling.Customer?.name || 'N/A'}
               </Descriptions.Item>
-              <Descriptions.Item label="Contact Person" span={1}>
-                {selectedBilling.Customer?.contact_name || 'N/A'}
-              </Descriptions.Item>
-              <Descriptions.Item label="Phone" span={1}>
-                {selectedBilling.Customer?.phone || 'N/A'}
-              </Descriptions.Item>
-              <Descriptions.Item label="Email" span={2}>
-                {selectedBilling.Customer?.email || 'N/A'}
+              <Descriptions.Item label="Contact Info" span={1}>
+                <div>
+                  {selectedBilling.Customer?.phone && `📞 ${selectedBilling.Customer.phone}`}
+                  {selectedBilling.Customer?.phone && selectedBilling.Customer?.email && ' • '}
+                  {selectedBilling.Customer?.email && `✉️ ${selectedBilling.Customer.email}`}
+                </div>
               </Descriptions.Item>
               <Descriptions.Item label="Order Date" span={1}>
                 {selectedBilling.order_date ? dayjs(selectedBilling.order_date).format('DD/MM/YYYY HH:mm') : 'N/A'}

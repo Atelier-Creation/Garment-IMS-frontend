@@ -16,6 +16,7 @@ import {
 } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import { supplierService } from '../services';
+import { HelpTooltip } from '../components';
 
 const { Option } = Select;
 
@@ -172,7 +173,13 @@ const Suppliers = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Suppliers</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Suppliers
+          <HelpTooltip 
+            title="Supplier Management"
+            content="Manage your supplier database including contact information, payment terms, and supplier categories. Create new suppliers, edit existing ones, and maintain supplier relationships for purchase orders and procurement."
+          />
+        </h1>
         <Button
           type="primary"
           icon={<PlusOutlined />}

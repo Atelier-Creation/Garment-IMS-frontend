@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Button, Modal, Form, Input, Select, message, Space, Popconfirm, InputNumber, Row, Col, Tag } from 'antd';
+import { Card, Table, Button, Modal, Form, Input, Select, message, Space, Popconfirm, InputNumber, Row, Col, Tag, Divider } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
-import { productService, categoryService } from '../services';
-import { SearchInput } from "../components";
+import { productService, categoryService, subcategoryService } from '../services';
+import { SearchInput, HelpTooltip } from "../components";
 
 const { Option } = Select;
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [subcategoryModalVisible, setSubcategoryModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -19,11 +23,22 @@ const Products = () => {
   });
   const [searchText, setSearchText] = useState('');
   const [form] = Form.useForm();
+  const [categoryForm] = Form.useForm();
+  const [subcategoryForm] = Form.useForm();
 
   useEffect(() => {
     fetchProducts();
     fetchCategories();
   }, [pagination.current, pagination.pageSize, searchText]);
+
+  // Fetch subcategories when category is selected
+  useEffect(() => {
+    if (selectedCategoryId) {
+      fetchSubcategories(selectedCategoryId);
+    } else {
+      setSubcategories([]);
+    }
+  }, [selectedCategoryId]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -63,6 +78,18 @@ const Products = () => {
     }
   };
 
+  const fetchSubcategories = async (categoryId) => {
+    try {
+      const response = await subcategoryService.getSubcategories(categoryId);
+      if (response.success) {
+        setSubcategories(response.data.subcategories || []);
+      }
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+      setSubcategories([]);
+    }
+  };
+
   const handleSubmit = async (values) => {
     try {
       if (editingProduct) {
@@ -84,8 +111,19 @@ const Products = () => {
 
   const handleEdit = (product) => {
     setEditingProduct(product);
-    form.setFieldsValue(product);
+    form.setFieldsValue({
+      ...product,
+      categoryId: product.category_id,
+      subCategoryId: product.sub_category_id
+    });
+    setSelectedCategoryId(product.category_id);
     setModalVisible(true);
+  };
+
+  const handleCategoryChange = (categoryId) => {
+    setSelectedCategoryId(categoryId);
+    // Reset subcategory when category changes
+    form.setFieldsValue({ subCategoryId: undefined });
   };
 
   const handleDelete = async (id) => {
@@ -112,6 +150,58 @@ const Products = () => {
     setPagination(prev => ({ ...prev, current: 1 }));
   };
 
+  // Handle category creation
+  const handleCreateCategory = async (values) => {
+    try {
+      const response = await categoryService.createCategory(values);
+      if (response.success) {
+        message.success('Category created successfully');
+        setCategoryModalVisible(false);
+        categoryForm.resetFields();
+        await fetchCategories(); // Refresh categories list
+      }
+    } catch (error) {
+      message.error('Failed to create category');
+      console.error('Error creating category:', error);
+    }
+  };
+
+  // Handle subcategory creation
+  const handleCreateSubcategory = async (values) => {
+    try {
+      const subcategoryData = {
+        ...values,
+        category_id: selectedCategoryId
+      };
+      const response = await subcategoryService.createSubcategory(subcategoryData);
+      if (response.success) {
+        message.success('Subcategory created successfully');
+        setSubcategoryModalVisible(false);
+        subcategoryForm.resetFields();
+        await fetchSubcategories(selectedCategoryId); // Refresh subcategories list
+      }
+    } catch (error) {
+      message.error('Failed to create subcategory');
+      console.error('Error creating subcategory:', error);
+    }
+  };
+
+  // Open category creation modal
+  const openCategoryModal = () => {
+    categoryForm.resetFields();
+    setCategoryModalVisible(true);
+  };
+
+  // Open subcategory creation modal
+  const openSubcategoryModal = () => {
+    if (!selectedCategoryId) {
+      message.warning('Please select a category first');
+      return;
+    }
+    subcategoryForm.resetFields();
+    setSubcategoryModalVisible(true);
+  };
+
   const columns = [
     {
       title: 'Product Code',
@@ -130,6 +220,12 @@ const Products = () => {
       dataIndex: ['Category', 'name'],
       key: 'category',
       render: (_, record) => record.Category?.name || 'N/A',
+    },
+    {
+      title: 'Subcategory',
+      dataIndex: ['Subcategory', 'name'],
+      key: 'subcategory',
+      render: (_, record) => record.Subcategory?.name || 'N/A',
     },
     {
       title: 'Brand',
@@ -195,13 +291,24 @@ const Products = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Products</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Products
+          <HelpTooltip 
+            title="Products Management"
+            content="Manage your product catalog including product details, categories, subcategories, pricing, and variants. Create new products with categories/subcategories directly from the form. Track product status and organize inventory efficiently."
+          />
+        </h1>
         <Button
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => {
             setEditingProduct(null);
+            setSelectedCategoryId(null);
+            setCategoryModalVisible(false);
+            setSubcategoryModalVisible(false);
             form.resetFields();
+            categoryForm.resetFields();
+            subcategoryForm.resetFields();
             setModalVisible(true);
           }}
         >
@@ -241,7 +348,12 @@ const Products = () => {
         onCancel={() => {
           setModalVisible(false);
           setEditingProduct(null);
+          setSelectedCategoryId(null);
+          setCategoryModalVisible(false);
+          setSubcategoryModalVisible(false);
           form.resetFields();
+          categoryForm.resetFields();
+          subcategoryForm.resetFields();
         }}
         footer={null}
         width={600}
@@ -277,13 +389,56 @@ const Products = () => {
             label="Category"
             rules={[{ required: true, message: 'Please select category' }]}
           >
-            <Select placeholder="Select category">
-              {Array.isArray(categories) && categories.map(category => (
-                <Option key={category.id} value={category.id}>
-                  {category.name}
-                </Option>
-              ))}
-            </Select>
+            <div className="flex gap-2">
+              <Select 
+                placeholder="Select category"
+                onChange={handleCategoryChange}
+                style={{ flex: 1 }}
+              >
+                {Array.isArray(categories) && categories.map(category => (
+                  <Option key={category.id} value={category.id}>
+                    {category.name}
+                  </Option>
+                ))}
+              </Select>
+              <Button
+                type="dashed"
+                icon={<PlusOutlined />}
+                onClick={openCategoryModal}
+                title="Add new category"
+              >
+                Add
+              </Button>
+            </div>
+          </Form.Item>
+
+          <Form.Item
+            name="subCategoryId"
+            label="Subcategory"
+          >
+            <div className="flex gap-2">
+              <Select 
+                placeholder="Select subcategory"
+                disabled={!selectedCategoryId}
+                allowClear
+                style={{ flex: 1 }}
+              >
+                {Array.isArray(subcategories) && subcategories.map(subcategory => (
+                  <Option key={subcategory.id} value={subcategory.id}>
+                    {subcategory.name}
+                  </Option>
+                ))}
+              </Select>
+              <Button
+                type="dashed"
+                icon={<PlusOutlined />}
+                onClick={openSubcategoryModal}
+                disabled={!selectedCategoryId}
+                title="Add new subcategory"
+              >
+                Add
+              </Button>
+            </div>
           </Form.Item>
 
           <Form.Item
@@ -357,11 +512,124 @@ const Products = () => {
           </Row>
 
           <div className="flex justify-end gap-2">
-            <Button onClick={() => setModalVisible(false)}>
+            <Button onClick={() => {
+              setModalVisible(false);
+              setSelectedCategoryId(null);
+              setCategoryModalVisible(false);
+              setSubcategoryModalVisible(false);
+              categoryForm.resetFields();
+              subcategoryForm.resetFields();
+            }}>
               Cancel
             </Button>
             <Button type="primary" htmlType="submit">
               {editingProduct ? 'Update' : 'Create'}
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* Category Creation Modal */}
+      <Modal
+        title="Add New Category"
+        open={categoryModalVisible}
+        onCancel={() => {
+          setCategoryModalVisible(false);
+          categoryForm.resetFields();
+        }}
+        footer={null}
+        width={400}
+      >
+        <Form
+          form={categoryForm}
+          layout="vertical"
+          onFinish={handleCreateCategory}
+        >
+          <Form.Item
+            name="name"
+            label="Category Name"
+            rules={[
+              { required: true, message: 'Please enter category name' },
+              { min: 2, message: 'Category name must be at least 2 characters' }
+            ]}
+          >
+            <Input placeholder="Enter category name" />
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label="Description"
+          >
+            <Input.TextArea placeholder="Enter category description (optional)" rows={3} />
+          </Form.Item>
+
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => {
+              setCategoryModalVisible(false);
+              categoryForm.resetFields();
+            }}>
+              Cancel
+            </Button>
+            <Button type="primary" htmlType="submit">
+              Create Category
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* Subcategory Creation Modal */}
+      <Modal
+        title="Add New Subcategory"
+        open={subcategoryModalVisible}
+        onCancel={() => {
+          setSubcategoryModalVisible(false);
+          subcategoryForm.resetFields();
+        }}
+        footer={null}
+        width={400}
+      >
+        <Form
+          form={subcategoryForm}
+          layout="vertical"
+          onFinish={handleCreateSubcategory}
+        >
+          <Form.Item
+            label="Parent Category"
+          >
+            <Input 
+              value={categories.find(cat => cat.id === selectedCategoryId)?.name || ''} 
+              disabled 
+              placeholder="No category selected"
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="name"
+            label="Subcategory Name"
+            rules={[
+              { required: true, message: 'Please enter subcategory name' },
+              { min: 2, message: 'Subcategory name must be at least 2 characters' }
+            ]}
+          >
+            <Input placeholder="Enter subcategory name" />
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label="Description"
+          >
+            <Input.TextArea placeholder="Enter subcategory description (optional)" rows={3} />
+          </Form.Item>
+
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => {
+              setSubcategoryModalVisible(false);
+              subcategoryForm.resetFields();
+            }}>
+              Cancel
+            </Button>
+            <Button type="primary" htmlType="submit">
+              Create Subcategory
             </Button>
           </div>
         </Form>

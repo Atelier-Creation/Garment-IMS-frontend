@@ -18,7 +18,7 @@ import { stockService, productService, rawMaterialService } from "../services";
 import api from "../services/api";
 
 const { Option } = Select;
-import { SearchInput } from "../components";
+import { SearchInput, HelpTooltip } from "../components";
 
 const Stock = () => {
   const [stocks, setStocks] = useState([]);
@@ -55,6 +55,7 @@ const Stock = () => {
       };
       
       let allStocks = [];
+      let totalCount = 0;
       
       // Fetch both finished goods and raw materials
       if (type === "all" || type === "finished_goods") {
@@ -72,6 +73,7 @@ const Stock = () => {
               unit: 'PCS'
             }));
             allStocks = [...allStocks, ...fgStocks];
+            totalCount += fgResponse.data.data.pagination?.total || fgStocks.length;
           }
         } catch (error) {
           console.error("Failed to fetch finished goods:", error);
@@ -82,17 +84,33 @@ const Stock = () => {
         try {
           const rmResponse = await api.get('/stock/raw-materials', { params });
           if (rmResponse.data.success) {
-            const rmStocks = (rmResponse.data.data.raw_material_stock || []).map(item => ({
-              ...item,
-              stock_type: 'raw_materials',
-              item_type: 'raw_material',
-              item_name: item.RawMaterial?.name || 'N/A',
-              item_code: item.RawMaterial?.material_code || item.batch_code || 'N/A',
-              quantity: item.qty,
-              branch: item.Branch?.name || 'N/A',
-              unit: item.RawMaterial?.uom || 'N/A'
-            }));
+            const rmBatches = rmResponse.data.data.raw_material_stock || [];
+            
+            // Aggregate batches by raw_material_id and branch_id
+            const aggregatedRM = {};
+            rmBatches.forEach(item => {
+              const key = `${item.raw_material_id}_${item.branch_id}`;
+              if (!aggregatedRM[key]) {
+                aggregatedRM[key] = {
+                  ...item,
+                  stock_type: 'raw_materials',
+                  item_type: 'raw_material',
+                  item_name: item.RawMaterial?.name || 'N/A',
+                  item_code: item.RawMaterial?.material_code || 'N/A',
+                  quantity: 0,
+                  branch: item.Branch?.name || 'N/A',
+                  unit: item.RawMaterial?.uom || 'N/A',
+                  batch_count: 0
+                };
+              }
+              // Sum up quantities from all batches
+              aggregatedRM[key].quantity += parseFloat(item.qty || 0);
+              aggregatedRM[key].batch_count += 1;
+            });
+            
+            const rmStocks = Object.values(aggregatedRM);
             allStocks = [...allStocks, ...rmStocks];
+            totalCount += rmResponse.data.data.pagination?.total || rmStocks.length;
           }
         } catch (error) {
           console.error("Failed to fetch raw materials:", error);
@@ -103,7 +121,7 @@ const Stock = () => {
       setPagination(prev => ({
         ...prev,
         current: page,
-        total: allStocks.length,
+        total: totalCount,
       }));
     } catch (error) {
       console.error("Failed to fetch stocks:", error);
@@ -225,8 +243,13 @@ const Stock = () => {
               // For finished goods, show variant details
               <span>{record.ProductVariant.sku} ({record.ProductVariant.size} - {record.ProductVariant.color})</span>
             ) : (
-              // For raw materials, show material code
-              <span>{record.RawMaterial?.material_code || record.item_code}</span>
+              // For raw materials, show material code and batch count
+              <span>
+                {record.RawMaterial?.material_code || record.item_code}
+                {record.batch_count > 1 && (
+                  <span className="ml-2 text-blue-600">({record.batch_count} batches)</span>
+                )}
+              </span>
             )}
           </div>
         </div>
@@ -272,12 +295,6 @@ const Stock = () => {
       )
     },
     {
-      title: "Last Updated",
-      dataIndex: "updated_at",
-      key: "updated_at",
-      render: (date) => date ? new Date(date).toLocaleDateString() : "-",
-    },
-    {
       title: "Actions",
       key: "actions",
       render: (_, record) => (
@@ -312,7 +329,13 @@ const Stock = () => {
             <Warehouse size={20} className="text-gray-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Stock Management</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Stock Management
+              <HelpTooltip 
+                title="Stock Management"
+                content="Monitor and manage inventory levels for both finished goods and raw materials. Track stock movements, adjust quantities, view stock history, and manage stock across different locations. Filter by stock type and search for specific items."
+              />
+            </h2>
             <p className="text-sm text-gray-600">Monitor and manage inventory levels</p>
           </div>
         </div>

@@ -12,6 +12,7 @@ export { stockAdjustmentService } from './stockAdjustmentService';
 export { reportService } from './reportService';
 export { bomService } from './bomService';
 export { categoryService } from './categoryService';
+export { subcategoryService } from './subcategoryService';
 export { productService } from './productService';
 export { productVariantService } from './productVariantService';
 export { userService } from './userService';
