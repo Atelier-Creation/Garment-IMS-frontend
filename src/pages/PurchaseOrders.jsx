@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Modal, 
-  Form, 
-  Input, 
-  message, 
-  Space, 
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  message,
+  Space,
   Popconfirm,
   Select,
   Row,
@@ -25,10 +25,10 @@ import {
   Dropdown,
   Tooltip
 } from 'antd';
-import { 
-  PlusOutlined, 
-  EditOutlined, 
-  DeleteOutlined, 
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
   SearchOutlined,
   EyeOutlined,
   CheckOutlined,
@@ -43,6 +43,7 @@ import { purchaseOrderService, supplierService, rawMaterialService } from '../se
 import api from '../services/api';
 import moment from 'moment';
 import { HelpTooltip } from '../components';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -76,7 +77,21 @@ const PurchaseOrders = () => {
   const [form] = Form.useForm();
   const [receiveForm] = Form.useForm();
   const [rawMaterialForm] = Form.useForm();
+
   const [cancelForm] = Form.useForm();
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.createOrder) {
+      setEditingPurchaseOrder(null);
+      form.resetFields();
+      setModalVisible(true);
+      // Clear the state so it doesn't reopen on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, form]);
 
   useEffect(() => {
     fetchPurchaseOrders();
@@ -93,7 +108,7 @@ const PurchaseOrders = () => {
         limit: pagination.pageSize,
         search: searchText || undefined
       };
-      
+
       const response = await purchaseOrderService.getPurchaseOrders(params);
       if (response.success) {
         setPurchaseOrders(response.data.purchase_orders || []);
@@ -134,7 +149,7 @@ const PurchaseOrders = () => {
 
   const fetchRawMaterials = async (searchValue = '') => {
     try {
-      const params = { 
+      const params = {
         limit: 100,
         search: searchValue || undefined
       };
@@ -142,7 +157,7 @@ const PurchaseOrders = () => {
       if (response.success) {
         const materials = response.data.rawMaterials || [];
         setRawMaterials(materials);
-        
+
         // Create options for AutoComplete
         const options = materials.map(material => ({
           value: material.id,
@@ -181,13 +196,13 @@ const PurchaseOrders = () => {
       if (response.success) {
         notification.success({
           message: 'Success',
-          description: editingPurchaseOrder 
-            ? 'Purchase order updated successfully' 
+          description: editingPurchaseOrder
+            ? 'Purchase order updated successfully'
             : 'Purchase order created successfully',
           placement: 'topRight',
           duration: 3
         });
-        
+
         setModalVisible(false);
         setEditingPurchaseOrder(null);
         form.resetFields();
@@ -240,15 +255,15 @@ const PurchaseOrders = () => {
           received_quantity: parseFloat(item.receivedQuantity) || 0
         }))
       };
-      
+
       const response = await purchaseOrderService.receivePurchaseOrder(selectedPurchaseOrder.id, transformedData);
-      
+
       message.success('Purchase order received successfully');
       setReceiveModalVisible(false);
       setSelectedPurchaseOrder(null);
       receiveForm.resetFields();
       fetchPurchaseOrders();
-      
+
       // If the view modal is open for the same order, refresh it
       if (viewingPurchaseOrder?.id === selectedPurchaseOrder.id) {
         const updatedResponse = await purchaseOrderService.getPurchaseOrderById(selectedPurchaseOrder.id);
@@ -264,12 +279,12 @@ const PurchaseOrders = () => {
 
   const handleEdit = async (purchaseOrder) => {
     setEditingPurchaseOrder(purchaseOrder);
-    
+
     // Ensure raw materials are loaded
     if (rawMaterials.length === 0) {
       await fetchRawMaterials();
     }
-    
+
     // Set form values
     form.setFieldsValue({
       supplierId: purchaseOrder.supplier_id,
@@ -282,7 +297,7 @@ const PurchaseOrders = () => {
         unitPrice: parseFloat(item.unit_price)
       })) || []
     });
-    
+
     setModalVisible(true);
   };
 
@@ -313,7 +328,7 @@ const PurchaseOrders = () => {
   const handleCancel = async (values) => {
     try {
       const response = await purchaseOrderService.cancelPurchaseOrder(
-        cancellingPurchaseOrder.id, 
+        cancellingPurchaseOrder.id,
         values.reason
       );
       if (response.success) {
@@ -377,13 +392,13 @@ const PurchaseOrders = () => {
           placement: 'topRight',
           duration: 3
         });
-        
+
         setRawMaterialModalVisible(false);
         rawMaterialForm.resetFields();
-        
+
         // Refresh raw materials list
         await fetchRawMaterials();
-        
+
         // Auto-select the newly created raw material in the current item
         if (currentItemIndex !== null && response.data) {
           const items = form.getFieldValue('items') || [];
@@ -411,7 +426,7 @@ const PurchaseOrders = () => {
   const handleRawMaterialSelect = (value, option, itemIndex) => {
     // Get the selected raw material details
     const selectedMaterial = option.material;
-    
+
     // Update the form field with raw material ID and auto-fill unit price
     const items = form.getFieldValue('items') || [];
     items[itemIndex] = {
@@ -434,7 +449,7 @@ const PurchaseOrders = () => {
   };
 
   const hasReceivedItems = (purchaseOrder) => {
-    return purchaseOrder?.PurchaseOrderItems?.some(item => 
+    return purchaseOrder?.PurchaseOrderItems?.some(item =>
       item.received_quantity && item.received_quantity > 0
     );
   };
@@ -485,10 +500,10 @@ const PurchaseOrders = () => {
 
   const handleExportExcel = () => {
     if (!viewingPurchaseOrder) return;
-    
+
     const po = viewingPurchaseOrder;
     let csvContent = "data:text/csv;charset=utf-8,";
-    
+
     // Header
     csvContent += "Purchase Order\n\n";
     csvContent += `PO Number:,${po.po_number}\n`;
@@ -496,7 +511,7 @@ const PurchaseOrders = () => {
     csvContent += `Order Date:,${moment(po.ordered_at).format('DD/MM/YYYY')}\n`;
     csvContent += `Expected Delivery:,${moment(po.expected_date).format('DD/MM/YYYY')}\n`;
     csvContent += `Status:,${po.status}\n\n`;
-    
+
     // Items
     csvContent += "Item,Material Code,Quantity,Unit Price,Tax,Total\n";
     po.PurchaseOrderItems?.forEach((item, index) => {
@@ -508,9 +523,9 @@ const PurchaseOrders = () => {
       csvContent += `${item.tax || 0},`;
       csvContent += `${item.total}\n`;
     });
-    
+
     csvContent += `\nTotal Amount:,,,,,${po.total_amount}\n`;
-    
+
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -518,7 +533,7 @@ const PurchaseOrders = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     message.success('Purchase order exported successfully');
   };
 
@@ -529,11 +544,11 @@ const PurchaseOrders = () => {
       key: 'po_number',
       render: (text, record) => (
         <Tooltip title="Click to view purchase order details">
-          <Button 
-            type="link" 
+          <Button
+            type="link"
             className="font-mono text-sm p-0 h-auto"
             onClick={() => handleView(record)}
-            style={{ 
+            style={{
               textDecoration: 'underline',
               color: '#1890ff',
               fontWeight: 'bold',
@@ -658,7 +673,7 @@ const PurchaseOrders = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           Purchase Orders
-          <HelpTooltip 
+          <HelpTooltip
             title="Purchase Orders Management"
             content="Create and manage purchase orders for raw materials from suppliers. Track order status from draft to received, view detailed order information, receive items with quantity tracking, and cancel orders when needed. Click order numbers to view full details."
           />
@@ -778,18 +793,18 @@ const PurchaseOrders = () => {
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <Card key={key} size="small" className="mb-4" 
-                        title={`Item ${name + 1}`}
-                        extra={
-                          <Button 
-                            type="link" 
-                            danger 
-                            onClick={() => remove(name)}
-                            icon={<DeleteOutlined />}
-                          >
-                            Remove
-                          </Button>
-                        }>
+                  <Card key={key} size="small" className="mb-4"
+                    title={`Item ${name + 1}`}
+                    extra={
+                      <Button
+                        type="link"
+                        danger
+                        onClick={() => remove(name)}
+                        icon={<DeleteOutlined />}
+                      >
+                        Remove
+                      </Button>
+                    }>
                     <Row gutter={16}>
                       <Col span={12}>
                         <Form.Item
@@ -825,8 +840,8 @@ const PurchaseOrders = () => {
                                 <div className="text-center py-2">
                                   <Text type="secondary">No raw materials found</Text>
                                   <br />
-                                  <Button 
-                                    type="link" 
+                                  <Button
+                                    type="link"
                                     size="small"
                                     onClick={() => {
                                       setCurrentItemIndex(name);
@@ -838,7 +853,7 @@ const PurchaseOrders = () => {
                                 </div>
                               }
                             />
-                            <Button 
+                            <Button
                               type="dashed"
                               icon={<PlusOutlined />}
                               onClick={() => {
@@ -1004,7 +1019,7 @@ const PurchaseOrders = () => {
           showIcon
           className="mb-4"
         />
-        
+
         <Form
           form={rawMaterialForm}
           layout="vertical"
@@ -1139,9 +1154,9 @@ const PurchaseOrders = () => {
             Export Excel
           </Button>,
           ...(viewingPurchaseOrder && ['DRAFT', 'PLACED'].includes(viewingPurchaseOrder.status?.toUpperCase()) && !hasReceivedItems(viewingPurchaseOrder) ? [
-            <Button 
-              key="cancel" 
-              danger 
+            <Button
+              key="cancel"
+              danger
               icon={<ExclamationCircleOutlined />}
               onClick={() => {
                 setCancellingPurchaseOrder(viewingPurchaseOrder);
@@ -1251,9 +1266,9 @@ const PurchaseOrders = () => {
                       const ordered = parseFloat(record.qty);
                       const isComplete = received >= ordered;
                       const isPartial = received > 0 && received < ordered;
-                      
+
                       return (
-                        <span style={{ 
+                        <span style={{
                           color: isComplete ? '#52c41a' : isPartial ? '#fa8c16' : '#666',
                           fontWeight: received > 0 ? 'bold' : 'normal'
                         }}>
@@ -1273,7 +1288,7 @@ const PurchaseOrders = () => {
                       const received = parseFloat(record.received_quantity || 0);
                       const pending = ordered - received;
                       return (
-                        <span style={{ 
+                        <span style={{
                           color: pending > 0 ? '#fa8c16' : '#52c41a',
                           fontWeight: pending > 0 ? 'bold' : 'normal'
                         }}>
@@ -1320,7 +1335,7 @@ const PurchaseOrders = () => {
 
                   // Calculate total ordered amount for comparison
                   const totalOrderedAmount = parseFloat(viewingPurchaseOrder.total_amount || 0);
-                  
+
                   return (
                     <Table.Summary fixed>
                       <Table.Summary.Row style={{ backgroundColor: '#f5f5f5' }}>
@@ -1382,7 +1397,7 @@ const PurchaseOrders = () => {
           showIcon
           className="mb-4"
         />
-        
+
         {cancellingPurchaseOrder && (
           <div className="mb-4">
             <Descriptions column={1} size="small" bordered>
@@ -1417,8 +1432,8 @@ const PurchaseOrders = () => {
               { min: 10, message: 'Reason must be at least 10 characters long' }
             ]}
           >
-            <Input.TextArea 
-              rows={4} 
+            <Input.TextArea
+              rows={4}
               placeholder="Please provide a detailed reason for cancelling this purchase order..."
               maxLength={500}
               showCount

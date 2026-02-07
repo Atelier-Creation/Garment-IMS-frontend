@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useSpring, useTransform } from "framer-motion";
 import { Users, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function StatCard({
   title,
@@ -16,6 +16,7 @@ export default function StatCard({
 }) {
   const isPositive = percentage >= 1;
   const arrowIconColor = arrowColor;
+  const navigate = useNavigate();
 
   // Enhanced responsive detection
   const [screenSize, setScreenSize] = useState(() => {
@@ -76,10 +77,9 @@ export default function StatCard({
 
   const displayValue = formatValue(value);
 
-  // Responsive classes based on screen size
   const getResponsiveClasses = () => {
     const base = "relative bg-white rounded-xl shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-all duration-200";
-    
+
     switch (screenSize) {
       case "sm":
         return `${base} p-3`;
@@ -136,6 +136,33 @@ export default function StatCard({
 
   const textClasses = getTextClasses();
 
+  // Animation for the value
+  const springValue = useSpring(0, { stiffness: 50, damping: 20 });
+  const displayValueRaw = useTransform(springValue, (current) => {
+    // We need to preserve the formatting logic but apply it to the animated value
+    // However, since formatValue depends on screenSize (state), using it inside useTransform might be tricky
+    // simplifying: we will animate checking the final value type.
+
+    // If value is a string with non-numeric chars (expect helper text), we might default to just showing value
+    // parsing logic from formatValue:
+    const numeric = parseFloat(String(value).replace(/[^\d.-]/g, ""));
+    if (isNaN(numeric)) return value; // can't animate non-numbers properly this way without more logic
+
+    // Use specific logic based on the target value
+    return formatValue(Math.floor(current));
+  });
+
+  useEffect(() => {
+    const numeric = parseFloat(String(value).replace(/[^\d.-]/g, ""));
+    if (!isNaN(numeric)) {
+      springValue.set(numeric);
+    }
+  }, [value, springValue]);
+
+  // If value is a component (React element) or complex string that we can't easily parse/animate, 
+  // we fallback to static display.
+  const isAnimatable = !isNaN(parseFloat(String(value).replace(/[^\d.-]/g, ""))) && typeof value !== 'object';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -143,6 +170,7 @@ export default function StatCard({
       transition={{ duration: 0.5, ease: "easeOut" }}
       whileHover={{ y: -2, transition: { duration: 0.2 } }}
       className={getResponsiveClasses()}
+      onClick={() => linkTo && navigate(linkTo)}
     >
       {/* Arrow - Responsive positioning and sizing */}
       {linkTo && (
@@ -182,9 +210,10 @@ export default function StatCard({
                 {title}
               </h3>
             )}
-            
+
+
             <h2 className={`${textClasses.value} ${screenSize === "sm" ? "mb-0" : "pt-1"}`}>
-              {displayValue}
+              {isAnimatable ? <motion.span>{displayValueRaw}</motion.span> : displayValue}
             </h2>
           </div>
         </div>
@@ -192,9 +221,8 @@ export default function StatCard({
         {/* Percentage - Responsive positioning */}
         {typeof percentage !== "undefined" && (
           <div
-            className={`${textClasses.percentage} flex items-center gap-1 ${
-              isPositive ? "text-green-600" : "text-red-600"
-            } ${screenSize === "sm" ? "self-end" : ""}`}
+            className={`${textClasses.percentage} flex items-center gap-1 ${isPositive ? "text-green-600" : "text-red-600"
+              } ${screenSize === "sm" ? "self-end" : ""}`}
           >
             <span>{percentage > 0 ? "+" : ""}{percentage}%</span>
           </div>

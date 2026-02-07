@@ -22,11 +22,25 @@ const HeaderBar = ({ collapsed, setCollapsed }) => {
   // Mock notifications for now - replace with actual API call
   useEffect(() => {
     setRecentNotifications([
-      { id: 1, title: "Low Stock Alert", message: "Product ABC is running low", type: "warning" },
+      { id: 1, title: "Low Stock Alert", message: "Product ABC is running low", type: "error" },
       { id: 2, title: "New Order", message: "Order #12345 received", type: "info" },
       { id: 3, title: "Production Complete", message: "Batch #789 completed", type: "success" },
     ]);
   }, []);
+
+  const getNotificationStyle = (type) => {
+    switch (type) {
+      case "error":
+      case "warning":
+        return { bg: "#fef2f2", color: "#ef4444", border: "#fecaca" }; // Red
+      case "info":
+        return { bg: "#eff6ff", color: "#3b82f6", border: "#bfdbfe" }; // Blue
+      case "success":
+        return { bg: "#f0fdf4", color: "#22c55e", border: "#bbf7d0" }; // Green
+      default:
+        return { bg: "#f3f4f6", color: "#6b7280", border: "#e5e7eb" }; // Gray
+    }
+  };
 
   const notificationContent = (
     <div style={{ minWidth: 220 }}>
@@ -37,26 +51,43 @@ const HeaderBar = ({ collapsed, setCollapsed }) => {
         loading={loadingNotifications}
         dataSource={recentNotifications}
         locale={{ emptyText: loadingNotifications ? "Loading..." : "No notifications" }}
-        renderItem={(item) => (
-          <List.Item
-            key={item.id}
-            style={{ display: "flex", justifyContent: "space-between", padding: 10 }}
-          >
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <Avatar style={{ backgroundColor: "#eef2ff", color: "#3730a3" }}>
-                {item.title.charAt(0)}
-              </Avatar>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600 }}>
-                  {item.title}
-                </div>
-                <div style={{ fontSize: 12, color: "#6b7280" }}>
-                  {item.message}
+        renderItem={(item) => {
+          const style = getNotificationStyle(item.type);
+          return (
+            <List.Item
+              key={item.id}
+              className="hover:bg-gray-50 transition-colors cursor-pointer"
+              style={{ padding: "12px 16px", borderBottom: "1px solid #f3f4f6" }}
+            >
+              <div style={{ display: "flex", gap: 12, alignItems: "start", width: "100%" }}>
+                <Avatar
+                  shape="square"
+                  style={{
+                    backgroundColor: style.bg,
+                    color: style.color,
+                    border: `1px solid ${style.border}`,
+                    borderRadius: 8
+                  }}
+                >
+                  {item.title.charAt(0)}
+                </Avatar>
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: style.color,
+                    marginBottom: 2
+                  }}>
+                    {item.title}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.4 }}>
+                    {item.message}
+                  </div>
                 </div>
               </div>
-            </div>
-          </List.Item>
-        )}
+            </List.Item>
+          );
+        }}
       />
 
       <div style={{ textAlign: "center", padding: 8, borderTop: "1px solid #f3f4f6" }}>
@@ -139,7 +170,7 @@ const HeaderBar = ({ collapsed, setCollapsed }) => {
             placeholder="Search"
             size="large"
             className="header-search"
-            style={{ 
+            style={{
               borderRadius: '8px',
               fontSize: '16px'
             }}
