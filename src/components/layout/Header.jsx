@@ -13,6 +13,7 @@ const HeaderBar = ({ collapsed, setCollapsed }) => {
   // state for recent notifications
   const [recentNotifications, setRecentNotifications] = useState([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [notificationPopoverOpen, setNotificationPopoverOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -38,7 +39,9 @@ const HeaderBar = ({ collapsed, setCollapsed }) => {
               minute: '2-digit'
             })}`,
             type: activity.type || 'info', // sales, production, purchase
-            timestamp: activity.created_at
+            timestamp: activity.created_at,
+            reference: activity.reference, // Store the full reference for navigation
+            referenceId: activity.reference_id // Store ID if available
           }));
           setRecentNotifications(notifications);
         }
@@ -86,7 +89,26 @@ const HeaderBar = ({ collapsed, setCollapsed }) => {
     };
 
     const route = routes[notification.type] || "/dashboard";
-    navigate(route);
+
+    // Extract order ID from reference (e.g., "SO-001" or "#12345")
+    const extractOrderId = (ref) => {
+      if (!ref) return null;
+      // Try to extract ID from reference string
+      const match = ref.match(/[#-]?(\d+)/);
+      return match ? match[1] : null;
+    };
+
+    // Close the popover
+    setNotificationPopoverOpen(false);
+
+    // Navigate with state to trigger order view
+    navigate(route, {
+      state: {
+        openOrderId: notification.referenceId || extractOrderId(notification.reference),
+        viewOrder: true,
+        notificationReference: notification.reference
+      }
+    });
   };
 
   const notificationContent = (
@@ -234,7 +256,13 @@ const HeaderBar = ({ collapsed, setCollapsed }) => {
 
       {/* RIGHT SIDE */}
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Popover content={notificationContent} trigger="click" placement="bottomRight">
+        <Popover
+          content={notificationContent}
+          trigger="click"
+          placement="bottomRight"
+          open={notificationPopoverOpen}
+          onOpenChange={setNotificationPopoverOpen}
+        >
           <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }} aria-label="Notifications" style={{ position: "relative", padding: 8, borderRadius: 10, background: "#f3f4f6", border: "none", cursor: "pointer" }}>
             <Bell style={{ width: 20, height: 20, color: textColor }} />
             <span style={{ position: "absolute", top: -6, right: -6, minWidth: 18, height: 18, padding: "0 5px", borderRadius: 9999, background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 6px rgba(0,0,0,0.12)" }}>
