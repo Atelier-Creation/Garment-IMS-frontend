@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Modal, 
-  Form, 
-  Input, 
-  message, 
-  Space, 
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  message,
+  Space,
   Popconfirm,
   Select,
   Row,
@@ -45,7 +45,7 @@ const Suppliers = () => {
         limit: pagination.pageSize,
         search: searchText || undefined
       };
-      
+
       const response = await supplierService.getSuppliers(params);
       if (response.success) {
         setSuppliers(response.data.suppliers || []);
@@ -171,11 +171,11 @@ const Suppliers = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           Suppliers
-          <HelpTooltip 
+          <HelpTooltip
             title="Supplier Management"
             content="Manage your supplier database including contact information, payment terms, and supplier categories. Create new suppliers, edit existing ones, and maintain supplier relationships for purchase orders and procurement."
           />

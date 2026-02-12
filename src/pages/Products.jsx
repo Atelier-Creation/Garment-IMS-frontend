@@ -48,7 +48,7 @@ const Products = () => {
         limit: pagination.pageSize,
         search: searchText || undefined
       };
-      
+
       const response = await productService.getProducts(params);
       if (response.success) {
         setProducts(response.data.products || []);
@@ -289,11 +289,11 @@ const Products = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           Products
-          <HelpTooltip 
+          <HelpTooltip
             title="Products Management"
             content="Manage your product catalog including product details, categories, subcategories, pricing, and variants. Create new products with categories/subcategories directly from the form. Track product status and organize inventory efficiently."
           />
@@ -390,7 +390,7 @@ const Products = () => {
             rules={[{ required: true, message: 'Please select category' }]}
           >
             <div className="flex gap-2">
-              <Select 
+              <Select
                 placeholder="Select category"
                 onChange={handleCategoryChange}
                 style={{ flex: 1 }}
@@ -417,7 +417,7 @@ const Products = () => {
             label="Subcategory"
           >
             <div className="flex gap-2">
-              <Select 
+              <Select
                 placeholder="Select subcategory"
                 disabled={!selectedCategoryId}
                 allowClear
@@ -596,9 +596,9 @@ const Products = () => {
           <Form.Item
             label="Parent Category"
           >
-            <Input 
-              value={categories.find(cat => cat.id === selectedCategoryId)?.name || ''} 
-              disabled 
+            <Input
+              value={categories.find(cat => cat.id === selectedCategoryId)?.name || ''}
+              disabled
               placeholder="No category selected"
             />
           </Form.Item>

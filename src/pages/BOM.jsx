@@ -1,28 +1,28 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Modal, 
-  Form, 
-  Input, 
-  Select, 
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Select,
   InputNumber,
-  message, 
-  Space, 
-  Tooltip, 
+  message,
+  Space,
+  Tooltip,
   Tag,
   Row,
   Col,
   Divider
 } from "antd";
-import { 
-  FileText, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Search, 
-  RefreshCcw, 
+import {
+  FileText,
+  Plus,
+  Edit,
+  Trash2,
+  Search,
+  RefreshCcw,
   Eye,
   Calculator
 } from "lucide-react";
@@ -63,7 +63,7 @@ const BOM = () => {
         limit: pagination.pageSize,
         search: search || undefined,
       };
-      
+
       const response = await bomService.getBOMs(params);
       if (response.success) {
         setBoms(response.data.boms || []);
@@ -88,7 +88,7 @@ const BOM = () => {
         productService.getProducts({ limit: 1000 }),
         rawMaterialService.getRawMaterials({ limit: 1000 })
       ]);
-      
+
       if (productsRes.success) {
         setProducts(productsRes.data.products || []);
       }
@@ -138,7 +138,7 @@ const BOM = () => {
   const handleBomItemChange = (index, field, value) => {
     const newItems = [...bomItems];
     newItems[index][field] = value;
-    
+
     // Auto-fill unit and cost when raw material is selected
     if (field === 'raw_material_id') {
       const selectedMaterial = rawMaterials.find(m => m.id === value);
@@ -147,12 +147,12 @@ const BOM = () => {
         newItems[index].cost_per_unit = parseFloat(selectedMaterial.average_cost || 0);
       }
     }
-    
+
     // Calculate total cost
     if (field === 'quantity' || field === 'cost_per_unit' || field === 'raw_material_id') {
       newItems[index].total_cost = (parseFloat(newItems[index].quantity) || 0) * (parseFloat(newItems[index].cost_per_unit) || 0);
     }
-    
+
     setBomItems(newItems);
   };
 
@@ -423,7 +423,7 @@ const BOM = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -433,7 +433,7 @@ const BOM = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Bill of Materials (BOM)
-              <HelpTooltip 
+              <HelpTooltip
                 title="Bill of Materials Management"
                 content="Create and manage BOMs (recipes) for products, defining raw material requirements and quantities needed for production. View detailed BOM breakdowns, calculate material costs, and maintain production specifications for manufacturing."
               />

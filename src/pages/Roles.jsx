@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Modal, 
-  Form, 
-  Input, 
-  message, 
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  message,
   Popconfirm,
   Row,
   Col,
@@ -15,12 +15,12 @@ import {
   Select,
   Divider
 } from "antd";
-import { 
-  Users, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Search, 
+import {
+  Users,
+  Plus,
+  Edit,
+  Trash2,
+  Search,
   RefreshCcw,
   Shield,
   Key
@@ -57,7 +57,7 @@ const Roles = () => {
         limit: pagination.pageSize,
         search: search || undefined,
       };
-      
+
       const response = await roleService.getRoles(params);
       if (response.success) {
         setRoles(response.data.data || []);
@@ -114,7 +114,7 @@ const Roles = () => {
         await roleService.createRole(values);
         message.success("Role created successfully");
       }
-      
+
       setModalVisible(false);
       setEditingRole(null);
       form.resetFields();
@@ -251,7 +251,7 @@ const Roles = () => {
   };
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -261,7 +261,7 @@ const Roles = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Roles
-              <HelpTooltip 
+              <HelpTooltip
                 title="Roles Management"
                 content="Create and manage user roles with specific permission sets. Define role hierarchies, assign permissions to roles, and control what users can access and do in the system. Roles determine user capabilities and access levels."
               />
@@ -303,7 +303,7 @@ const Roles = () => {
               onChange={(e) => !e.target.value && handleSearch("")}
             />
           </Col>
-          
+
           <Col xs={24} sm={12} md={4}>
             <div className="flex items-center gap-2 h-8">
               <Tag color="blue">Total: {pagination.total}</Tag>
@@ -377,7 +377,7 @@ const Roles = () => {
               { min: 2, message: "Role name must be at least 2 characters" }
             ]}
           >
-            <Input 
+            <Input
               placeholder="e.g., Manager, Operator, etc."
               disabled={!!editingRole}
             />
@@ -391,7 +391,7 @@ const Roles = () => {
               { min: 3, message: "Description must be at least 3 characters" }
             ]}
           >
-            <TextArea 
+            <TextArea
               rows={3}
               placeholder="Describe the role and its responsibilities"
             />

@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Card, Button, Table, Input, Select, Modal, Form, InputNumber, message, Tag, Space, Tooltip } from "antd";
-import { 
-  Warehouse, 
-  Search, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  RefreshCcw, 
-  Download, 
-  Upload, 
+import {
+  Warehouse,
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  RefreshCcw,
+  Download,
+  Upload,
   AlertTriangle,
   TrendingUp,
   TrendingDown,
@@ -53,10 +53,10 @@ const Stock = () => {
         branch_id: undefined,
         low_stock: undefined
       };
-      
+
       let allStocks = [];
       let totalCount = 0;
-      
+
       // Fetch both finished goods and raw materials
       if (type === "all" || type === "finished_goods") {
         try {
@@ -79,13 +79,13 @@ const Stock = () => {
           console.error("Failed to fetch finished goods:", error);
         }
       }
-      
+
       if (type === "all" || type === "raw_materials") {
         try {
           const rmResponse = await api.get('/stock/raw-materials', { params });
           if (rmResponse.data.success) {
             const rmBatches = rmResponse.data.data.raw_material_stock || [];
-            
+
             // Aggregate batches by raw_material_id and branch_id
             const aggregatedRM = {};
             rmBatches.forEach(item => {
@@ -107,7 +107,7 @@ const Stock = () => {
               aggregatedRM[key].quantity += parseFloat(item.qty || 0);
               aggregatedRM[key].batch_count += 1;
             });
-            
+
             const rmStocks = Object.values(aggregatedRM);
             allStocks = [...allStocks, ...rmStocks];
             totalCount += rmResponse.data.data.pagination?.total || rmStocks.length;
@@ -116,7 +116,7 @@ const Stock = () => {
           console.error("Failed to fetch raw materials:", error);
         }
       }
-      
+
       setStocks(allStocks);
       setPagination(prev => ({
         ...prev,
@@ -138,7 +138,7 @@ const Stock = () => {
         productService.getProducts({ limit: 1000 }),
         rawMaterialService.getRawMaterials({ limit: 1000 })
       ]);
-      
+
       if (productsRes.success) {
         setProducts(productsRes.data.data || []);
       }
@@ -182,7 +182,7 @@ const Stock = () => {
         branch_id: editingStock.branch_id,
         raw_material_id: editingStock.raw_material_id
       };
-      
+
       const response = await api.post('/stock/adjust', adjustmentData);
       if (response.data.success) {
         message.success("Stock adjusted successfully");
@@ -321,7 +321,7 @@ const Stock = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -331,7 +331,7 @@ const Stock = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Stock Management
-              <HelpTooltip 
+              <HelpTooltip
                 title="Stock Management"
                 content="Monitor and manage inventory levels for both finished goods and raw materials. Track stock movements, adjust quantities, view stock history, and manage stock across different locations. Filter by stock type and search for specific items."
               />
@@ -365,7 +365,7 @@ const Stock = () => {
       </div>
 
       {/* Filters */}
-      <Card className="mb-6">
+      <Card className="!mb-4 !p-0">
         <div className="flex flex-col md:flex-row gap-4">
           <SearchInput
             placeholder="Search by item name or code..."
@@ -402,7 +402,7 @@ const Stock = () => {
               `${range[0]}-${range[1]} of ${total} items`,
           }}
           onChange={handleTableChange}
-          scroll={{ x: 1200 }}
+          scroll={{ x: 1000 }}
         />
       </Card>
 
@@ -519,15 +519,15 @@ const Stock = () => {
             >
               {movementForm.getFieldValue("item_type") === "product"
                 ? products.map(product => (
-                    <Option key={product.id} value={product.id}>
-                      {product.product_name} ({product.product_code})
-                    </Option>
-                  ))
+                  <Option key={product.id} value={product.id}>
+                    {product.product_name} ({product.product_code})
+                  </Option>
+                ))
                 : rawMaterials.map(material => (
-                    <Option key={material.id} value={material.id}>
-                      {material.name} ({material.material_code})
-                    </Option>
-                  ))
+                  <Option key={material.id} value={material.id}>
+                    {material.name} ({material.material_code})
+                  </Option>
+                ))
               }
             </Select>
           </Form.Item>

@@ -138,7 +138,7 @@ const ExportOrders = () => {
         setCustomerModalVisible(false);
         customerForm.resetFields();
         await fetchCustomers(); // Refresh customers list
-        
+
         // Auto-select the newly created customer
         if (response.data && response.data.id) {
           form.setFieldsValue({ customer_id: response.data.id });
@@ -264,7 +264,7 @@ const ExportOrders = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
@@ -273,7 +273,7 @@ const ExportOrders = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Export Orders
-              <HelpTooltip 
+              <HelpTooltip
                 title="Export Orders Management"
                 content="Manage international export orders including customer details, product variants, shipping information, and export documentation. Track order status, manage export compliance, and coordinate international shipments."
               />
@@ -319,14 +319,14 @@ const ExportOrders = () => {
             rules={[{ required: true, message: "Please select customer" }]}
           >
             <div className="flex gap-2">
-              <Select 
-                placeholder="Select customer" 
+              <Select
+                placeholder="Select customer"
                 showSearch
                 style={{ flex: 1 }}
                 filterOption={(input, option) => {
                   const customer = customers.find(c => c.id === option.value);
                   if (!customer) return false;
-                  
+
                   const searchText = input.toLowerCase();
                   return (
                     customer.name?.toLowerCase().includes(searchText) ||
@@ -338,7 +338,7 @@ const ExportOrders = () => {
                 optionRender={(option) => {
                   const customer = customers.find(c => c.id === option.value);
                   if (!customer) return option.label;
-                  
+
                   return (
                     <div>
                       <div style={{ fontWeight: 'bold' }}>{customer.name}</div>
@@ -403,8 +403,8 @@ const ExportOrders = () => {
             <h3 className="font-semibold mb-3">Add Items</h3>
             <div className="grid grid-cols-4 gap-2 mb-2">
               <Form.Item name="variant_id" className="mb-0">
-                <Select 
-                  placeholder="Select product variant" 
+                <Select
+                  placeholder="Select product variant"
                   showSearch
                   filterOption={(input, option) =>
                     option.children.toLowerCase().includes(input.toLowerCase())
@@ -540,8 +540,8 @@ const ExportOrders = () => {
               { required: true, message: 'Please enter customer address' }
             ]}
           >
-            <Input.TextArea 
-              placeholder="Enter customer address" 
+            <Input.TextArea
+              placeholder="Enter customer address"
               rows={3}
             />
           </Form.Item>
@@ -570,8 +570,8 @@ const ExportOrders = () => {
             name="notes"
             label="Notes"
           >
-            <Input.TextArea 
-              placeholder="Enter any additional notes (optional)" 
+            <Input.TextArea
+              placeholder="Enter any additional notes (optional)"
               rows={2}
             />
           </Form.Item>

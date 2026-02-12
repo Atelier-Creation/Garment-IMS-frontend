@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Modal, 
-  Form, 
-  Input, 
-  message, 
-  Space, 
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  message,
+  Space,
   Row,
   Col,
   Tag,
@@ -21,8 +21,8 @@ import {
   Typography,
   Badge
 } from 'antd';
-import { 
-  InboxOutlined, 
+import {
+  InboxOutlined,
   SearchOutlined,
   EyeOutlined,
   CheckOutlined,
@@ -66,7 +66,7 @@ const PurchaseOrderInward = () => {
         limit: pagination.pageSize,
         search: searchText || undefined
       };
-      
+
       const response = await purchaseOrderInwardService.getInwardReadyOrders(params);
       if (response.success) {
         setInwardOrders(response.data.purchase_orders || []);
@@ -99,7 +99,7 @@ const PurchaseOrderInward = () => {
       const response = await purchaseOrderInwardService.getOrderForInward(order.id);
       if (response.success) {
         setSelectedOrder(response.data.purchase_order);
-        
+
         // Pre-populate form with order items
         const initialItems = response.data.purchase_order.PurchaseOrderItems
           .filter(item => item.pending_quantity > 0)
@@ -116,7 +116,7 @@ const PurchaseOrderInward = () => {
           received_date: moment(),
           received_items: initialItems
         });
-        
+
         setInwardModalVisible(true);
       }
     } catch (error) {
@@ -144,7 +144,7 @@ const PurchaseOrderInward = () => {
       };
 
       const response = await purchaseOrderInwardService.processInward(selectedOrder.id, formData);
-      
+
       if (response.success) {
         message.success(response.message || 'Purchase order inward processed successfully');
         setInwardModalVisible(false);
@@ -279,11 +279,11 @@ const PurchaseOrderInward = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
         <Title level={2} className="text-gray-800 mb-0">
           Purchase Order Inward
-          <HelpTooltip 
+          <HelpTooltip
             title="Purchase Order Inward"
             content="Process incoming purchase orders by recording received quantities, updating stock levels, and managing inward transactions. Track delivery status, verify quantities, and maintain accurate inventory records for received materials."
           />
@@ -394,9 +394,9 @@ const PurchaseOrderInward = () => {
                     label="Received Date"
                     rules={[{ required: true, message: 'Please select received date' }]}
                   >
-                    <DatePicker 
-                      showTime 
-                      style={{ width: '100%' }} 
+                    <DatePicker
+                      showTime
+                      style={{ width: '100%' }}
                       format="DD/MM/YYYY HH:mm"
                     />
                   </Form.Item>
@@ -455,7 +455,7 @@ const PurchaseOrderInward = () => {
                             </Text>
                           </Col>
                         </Row>
-                        
+
                         <Row gutter={16} className="mt-2">
                           <Col span={6}>
                             <Form.Item

@@ -1,29 +1,29 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Modal, 
-  Form, 
-  Input, 
-  Select, 
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Select,
   InputNumber,
-  message, 
-  Space, 
-  Tooltip, 
+  message,
+  Space,
+  Tooltip,
   Tag,
   Row,
   Col,
   Upload,
   Image
 } from "antd";
-import { 
-  Package2, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Search, 
-  RefreshCcw, 
+import {
+  Package2,
+  Plus,
+  Edit,
+  Trash2,
+  Search,
+  RefreshCcw,
   Eye,
   Upload as UploadIcon
 } from "lucide-react";
@@ -60,7 +60,7 @@ const ProductVariants = () => {
         limit: pagination.pageSize,
         search: search || undefined,
       };
-      
+
       const response = await productVariantService.getProductVariants(params);
       if (response.success) {
         setVariants(response.data.productVariants || []);
@@ -259,7 +259,7 @@ const ProductVariants = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -269,7 +269,7 @@ const ProductVariants = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Product Variants
-              <HelpTooltip 
+              <HelpTooltip
                 title="Product Variants Management"
                 content="Manage product variations including different sizes, colors, styles, and attributes. Set specific pricing, SKUs, and inventory levels for each variant. Track variant-specific stock and sales data."
               />

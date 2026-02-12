@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Modal, 
-  Form, 
-  Input, 
-  message, 
-  Space, 
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  message,
+  Space,
   Popconfirm,
   Select,
   Row,
@@ -45,7 +45,7 @@ const Customers = () => {
         limit: pagination.pageSize,
         search: searchText || undefined
       };
-      
+
       const response = await customerService.getCustomers(params);
       if (response.success) {
         setCustomers(response.data.customers || []);
@@ -161,7 +161,7 @@ const Customers = () => {
           <Button
             type="link"
             icon={<EyeOutlined />}
-            onClick={() => {/* View customer details */}}
+            onClick={() => {/* View customer details */ }}
           >
             View
           </Button>
@@ -188,11 +188,11 @@ const Customers = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           Customers
-          <HelpTooltip 
+          <HelpTooltip
             title="Customer Management"
             content="Manage your customer database including contact information, addresses, and customer types. Create new customers, edit existing ones, and maintain customer relationships. Search and filter customers for easy access during sales and billing."
           />

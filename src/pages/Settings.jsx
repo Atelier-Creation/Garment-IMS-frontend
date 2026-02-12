@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Card, 
-  Tabs, 
-  Form, 
-  Input, 
-  Button, 
-  Switch, 
-  Select, 
-  InputNumber, 
-  message, 
+import {
+  Card,
+  Tabs,
+  Form,
+  Input,
+  Button,
+  Switch,
+  Select,
+  InputNumber,
+  message,
   Divider,
   Row,
   Col,
@@ -16,13 +16,13 @@ import {
   Avatar,
   Space
 } from "antd";
-import { 
-  Settings as SettingsIcon, 
-  User, 
-  Bell, 
-  Shield, 
-  Database, 
-  Palette, 
+import {
+  Settings as SettingsIcon,
+  User,
+  Bell,
+  Shield,
+  Database,
+  Palette,
   Upload as UploadIcon,
   Save,
   RefreshCcw
@@ -39,7 +39,7 @@ const Settings = () => {
   const [userProfile, setUserProfile] = useState({});
   const [systemSettings, setSystemSettings] = useState({});
   const [roles, setRoles] = useState([]);
-  
+
   const [profileForm] = Form.useForm();
   const [systemForm] = Form.useForm();
   const [securityForm] = Form.useForm();
@@ -162,7 +162,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
@@ -171,7 +171,7 @@ const Settings = () => {
         <div>
           <h2 className="text-2xl font-bold text-gray-800">
             Settings
-            <HelpTooltip 
+            <HelpTooltip
               title="System Settings"
               content="Configure system preferences, user profile settings, security options, and notification preferences. Manage account details, system configurations, and personalize your application experience."
             />
@@ -183,18 +183,18 @@ const Settings = () => {
       <Card>
         <Tabs defaultActiveKey="profile" type="card">
           {/* Profile Settings */}
-          <TabPane 
+          <TabPane
             tab={
               <span className="flex items-center gap-2">
                 <User size={16} />
                 Profile
               </span>
-            } 
+            }
             key="profile"
           >
             <div className="max-w-2xl">
               <h3 className="text-lg font-semibold mb-4">Profile Information</h3>
-              
+
               <Form
                 form={profileForm}
                 layout="vertical"
@@ -279,9 +279,9 @@ const Settings = () => {
                 </Form.Item>
 
                 <Form.Item>
-                  <Button 
-                    type="primary" 
-                    htmlType="submit" 
+                  <Button
+                    type="primary"
+                    htmlType="submit"
                     loading={loading}
                     icon={<Save size={16} />}
                   >
@@ -293,18 +293,18 @@ const Settings = () => {
           </TabPane>
 
           {/* Security Settings */}
-          <TabPane 
+          <TabPane
             tab={
               <span className="flex items-center gap-2">
                 <Shield size={16} />
                 Security
               </span>
-            } 
+            }
             key="security"
           >
             <div className="max-w-2xl">
               <h3 className="text-lg font-semibold mb-4">Change Password</h3>
-              
+
               <Form
                 form={securityForm}
                 layout="vertical"
@@ -349,9 +349,9 @@ const Settings = () => {
                 </Form.Item>
 
                 <Form.Item>
-                  <Button 
-                    type="primary" 
-                    htmlType="submit" 
+                  <Button
+                    type="primary"
+                    htmlType="submit"
                     loading={loading}
                     icon={<Save size={16} />}
                   >
@@ -383,18 +383,18 @@ const Settings = () => {
           </TabPane>
 
           {/* System Settings */}
-          <TabPane 
+          <TabPane
             tab={
               <span className="flex items-center gap-2">
                 <Database size={16} />
                 System
               </span>
-            } 
+            }
             key="system"
           >
             <div className="max-w-2xl">
               <h3 className="text-lg font-semibold mb-4">Company Information</h3>
-              
+
               <Form
                 form={systemForm}
                 layout="vertical"
@@ -525,15 +525,15 @@ const Settings = () => {
 
                 <Form.Item>
                   <Space>
-                    <Button 
-                      type="primary" 
-                      htmlType="submit" 
+                    <Button
+                      type="primary"
+                      htmlType="submit"
                       loading={loading}
                       icon={<Save size={16} />}
                     >
                       Save Settings
                     </Button>
-                    <Button 
+                    <Button
                       icon={<RefreshCcw size={16} />}
                       onClick={() => {
                         systemForm.resetFields();
@@ -549,18 +549,18 @@ const Settings = () => {
           </TabPane>
 
           {/* Notification Settings */}
-          <TabPane 
+          <TabPane
             tab={
               <span className="flex items-center gap-2">
                 <Bell size={16} />
                 Notifications
               </span>
-            } 
+            }
             key="notifications"
           >
             <div className="max-w-2xl">
               <h3 className="text-lg font-semibold mb-4">Notification Preferences</h3>
-              
+
               <Form
                 form={notificationForm}
                 layout="vertical"
@@ -640,9 +640,9 @@ const Settings = () => {
                 </div>
 
                 <Form.Item className="mt-6">
-                  <Button 
-                    type="primary" 
-                    htmlType="submit" 
+                  <Button
+                    type="primary"
+                    htmlType="submit"
                     loading={loading}
                     icon={<Save size={16} />}
                   >
@@ -654,18 +654,18 @@ const Settings = () => {
           </TabPane>
 
           {/* Appearance Settings */}
-          <TabPane 
+          <TabPane
             tab={
               <span className="flex items-center gap-2">
                 <Palette size={16} />
                 Appearance
               </span>
-            } 
+            }
             key="appearance"
           >
             <div className="max-w-2xl">
               <h3 className="text-lg font-semibold mb-4">Theme & Display</h3>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -716,8 +716,8 @@ const Settings = () => {
                 </div>
               </div>
 
-              <Button 
-                type="primary" 
+              <Button
+                type="primary"
                 className="mt-6"
                 icon={<Save size={16} />}
               >

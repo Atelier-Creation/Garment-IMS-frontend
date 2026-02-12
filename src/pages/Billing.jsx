@@ -35,7 +35,7 @@ const Billing = () => {
         page: pagination.current,
         limit: pagination.pageSize
       });
-      
+
       if (response && response.success) {
         const billingsData = response.data || [];
         setBillings(billingsData);
@@ -58,7 +58,7 @@ const Billing = () => {
   const fetchCustomers = async () => {
     try {
       const response = await customerService.getCustomers({ limit: 1000 });
-      
+
       // customerService returns response.data directly
       if (response && response.success) {
         setCustomers(response.data.customers || []);
@@ -71,7 +71,7 @@ const Billing = () => {
   const fetchVariants = async () => {
     try {
       const response = await productVariantService.getProductVariants({ limit: 1000 });
-      
+
       if (response && response.success) {
         // The API returns: { success: true, data: { productVariants: [...] } }
         const variantsData = response.data.productVariants || [];
@@ -86,7 +86,7 @@ const Billing = () => {
   const fetchBranches = async () => {
     try {
       const response = await branchService.getBranches({ limit: 100 });
-      
+
       if (response && response.success) {
         const branchesData = response.data.branches || [];
         setBranches(branchesData);
@@ -160,11 +160,11 @@ const Billing = () => {
         }
 
         const customerResponse = await customerService.createCustomer(customerData);
-        
+
         // customerService returns response.data directly
         if (customerResponse && customerResponse.success) {
           customerId = customerResponse.data.id;
-          
+
           if (!customerId) {
             console.error('Customer ID is missing from response');
             message.error('Failed to get customer ID');
@@ -180,7 +180,7 @@ const Billing = () => {
       // Find Central Warehouse branch or use first available branch
       const centralWarehouse = branches.find(b => b.name === 'Central Warehouse');
       const defaultBranch = centralWarehouse || branches[0];
-      
+
       if (!defaultBranch) {
         message.error('No branches available. Please contact administrator.');
         return;
@@ -196,7 +196,7 @@ const Billing = () => {
       };
 
       const response = await billingService.createBilling(data);
-      
+
       // billingService returns response.data directly
       if (response && response.success) {
         message.success('Billing created successfully');
@@ -277,7 +277,7 @@ const Billing = () => {
   const handlePrintBill = (record) => {
     const printWindow = window.open('', '_blank');
     const items = record.SalesOrderItems || [];
-    
+
     const printContent = `
       <!DOCTYPE html>
       <html>
@@ -371,7 +371,7 @@ const Billing = () => {
       </body>
       </html>
     `;
-    
+
     printWindow.document.write(printContent);
     printWindow.document.close();
   };
@@ -490,7 +490,7 @@ const Billing = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
@@ -499,7 +499,7 @@ const Billing = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Billing / POS
-              <HelpTooltip 
+              <HelpTooltip
                 title="Billing & Point of Sale"
                 content="Create bills and process point-of-sale transactions. Add products to cart, select customers (or walk-in), apply discounts, and generate invoices. View detailed bill information with customer details and itemized purchases."
               />
@@ -523,7 +523,7 @@ const Billing = () => {
             Export CSV
           </Button>
         </div>
-        
+
       </div>
 
       <Card>
@@ -591,8 +591,8 @@ const Billing = () => {
                   label="Select Customer"
                   rules={[{ required: true, message: 'Please select customer' }]}
                 >
-                  <Select 
-                    placeholder="Select customer" 
+                  <Select
+                    placeholder="Select customer"
                     showSearch
                     filterOption={(input, option) =>
                       option.children.toLowerCase().includes(input.toLowerCase())

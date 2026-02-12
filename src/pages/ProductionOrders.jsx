@@ -71,7 +71,7 @@ const ProductionOrders = () => {
       if (bomsResponse.success) {
         setBoms(bomsResponse.data.boms || []);
       }
-      
+
       // Fetch variants for the product
       const variantsResponse = await api.get(`/product-variants/product/${productId}`, {
         params: { limit: 1000 }
@@ -91,19 +91,19 @@ const ProductionOrders = () => {
         start_at: values.start_at?.format("YYYY-MM-DD"),
         end_at: values.end_at?.format("YYYY-MM-DD")
       };
-      
+
       const response = await productionOrderService.createProductionOrder(data);
       if (response.success) {
         // Check if there are material shortages
         const materialReqs = response.data.material_requirements || [];
         const hasShortages = materialReqs.some(req => req.shortage > 0);
-        
+
         if (hasShortages) {
           const shortageList = materialReqs
             .filter(req => req.shortage > 0)
             .map(req => `${req.raw_material_name}: Short by ${req.shortage} units`)
             .join('\n');
-          
+
           message.warning({
             content: (
               <div>
@@ -117,7 +117,7 @@ const ProductionOrders = () => {
         } else {
           message.success("Production order created successfully");
         }
-        
+
         setIsModalVisible(false);
         form.resetFields();
         fetchOrders();
@@ -137,13 +137,13 @@ const ProductionOrders = () => {
     } catch (error) {
       console.error("Start production error:", error);
       console.error("Error response:", error.response);
-      
+
       const errorMsg = error.response?.data?.message || "Failed to start production order";
       console.log("Showing error message:", errorMsg);
-      
+
       // Show error message - simplified version
       message.error(errorMsg, 8);
-      
+
       // Also show as alert for debugging
       alert(`Cannot Start Production:\n\n${errorMsg}`);
     }
@@ -155,7 +155,7 @@ const ProductionOrders = () => {
         produced_qty: values.produced_qty,
         consumption_data: []
       };
-      
+
       const response = await productionOrderService.completeProductionOrder(selectedOrder.id, data);
       if (response.success) {
         message.success("Production order completed");
@@ -281,7 +281,7 @@ const ProductionOrders = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
@@ -290,7 +290,7 @@ const ProductionOrders = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Production Orders
-              <HelpTooltip 
+              <HelpTooltip
                 title="Production Orders Management"
                 content="Create and manage production orders for manufacturing products. Plan production schedules, track order status from planned to completed, manage raw material consumption, and record production output. Links with BOM for material requirements."
               />
@@ -371,7 +371,7 @@ const ProductionOrders = () => {
             label="Variant (Size/Color)"
             tooltip="Select the specific variant you're producing. This is required to track finished goods in stock."
           >
-            <Select 
+            <Select
               placeholder="Select variant (optional but recommended)"
               allowClear
               showSearch

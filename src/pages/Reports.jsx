@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card, Row, Col, Select, DatePicker, Button, Table, Statistic, Progress, message } from "antd";
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Download, 
-  FileText, 
-  DollarSign, 
-  Package, 
+import {
+  BarChart3,
+  TrendingUp,
+  Download,
+  FileText,
+  DollarSign,
+  Package,
   ShoppingCart,
   Calendar,
   Filter
@@ -110,7 +110,7 @@ const Reports = () => {
   // Get table data based on report type
   const getTableData = () => {
     if (!reportData) return [];
-    
+
     switch (reportType) {
       case 'purchase':
         return reportData.top_suppliers || [];
@@ -167,11 +167,10 @@ const Reports = () => {
       dataIndex: "status",
       key: "status",
       render: (status) => (
-        <span className={`px-2 py-1 rounded text-xs ${
-          status === 'completed' ? 'bg-green-100 text-green-800' :
-          status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-          'bg-red-100 text-red-800'
-        }`}>
+        <span className={`px-2 py-1 rounded text-xs ${status === 'completed' ? 'bg-green-100 text-green-800' :
+            status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-red-100 text-red-800'
+          }`}>
           {status}
         </span>
       ),
@@ -218,9 +217,8 @@ const Reports = () => {
       render: (_, record) => {
         const isLow = record.qty <= 10; // Using 10 as default low stock threshold
         return (
-          <span className={`px-2 py-1 rounded text-xs ${
-            isLow ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-          }`}>
+          <span className={`px-2 py-1 rounded text-xs ${isLow ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+            }`}>
             {isLow ? 'Low Stock' : 'Normal'}
           </span>
         );
@@ -321,7 +319,7 @@ const Reports = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -331,7 +329,7 @@ const Reports = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Reports & Analytics
-              <HelpTooltip 
+              <HelpTooltip
                 title="Reports & Analytics"
                 content="Generate comprehensive business reports including sales, purchase, production, and stock reports. Filter by date ranges, analyze trends, view summary statistics, and export reports for business insights and decision making."
               />
@@ -553,8 +551,8 @@ const Reports = () => {
                       <span className="text-sm text-gray-600">Efficiency</span>
                       <span className="font-medium">{parseFloat(reportData.summary.efficiency_percentage || 0).toFixed(1)}%</span>
                     </div>
-                    <Progress 
-                      percent={parseFloat(reportData.summary.efficiency_percentage || 0)} 
+                    <Progress
+                      percent={parseFloat(reportData.summary.efficiency_percentage || 0)}
                       strokeColor="#52c41a"
                     />
                   </div>
@@ -574,8 +572,8 @@ const Reports = () => {
                       <span className="text-sm text-gray-600">Profit Margin</span>
                       <span className="font-medium">{parseFloat(reportData.profit_analysis.profit_margin_percentage || 0).toFixed(1)}%</span>
                     </div>
-                    <Progress 
-                      percent={Math.min(parseFloat(reportData.profit_analysis.profit_margin_percentage || 0), 100)} 
+                    <Progress
+                      percent={Math.min(parseFloat(reportData.profit_analysis.profit_margin_percentage || 0), 100)}
                       strokeColor={parseFloat(reportData.profit_analysis.profit_margin_percentage || 0) > 0 ? "#52c41a" : "#ff4d4f"}
                     />
                   </div>
@@ -587,9 +585,9 @@ const Reports = () => {
                   <span className="text-sm text-gray-600">Total Records</span>
                   <span className="font-medium">{getTableData().length || 0}</span>
                 </div>
-                <Progress 
-                  percent={100} 
-                  showInfo={false} 
+                <Progress
+                  percent={100}
+                  showInfo={false}
                   strokeColor="#52c41a"
                 />
               </div>
@@ -601,8 +599,8 @@ const Reports = () => {
                       <span className="text-sm text-gray-600">Completed Orders</span>
                       <span className="font-medium">{reportData?.completed || 0}</span>
                     </div>
-                    <Progress 
-                      percent={reportData?.total ? (reportData.completed / reportData.total) * 100 : 0} 
+                    <Progress
+                      percent={reportData?.total ? (reportData.completed / reportData.total) * 100 : 0}
                       strokeColor="#52c41a"
                     />
                   </div>
@@ -611,8 +609,8 @@ const Reports = () => {
                       <span className="text-sm text-gray-600">Pending Orders</span>
                       <span className="font-medium">{reportData?.pending || 0}</span>
                     </div>
-                    <Progress 
-                      percent={reportData?.total ? (reportData.pending / reportData.total) * 100 : 0} 
+                    <Progress
+                      percent={reportData?.total ? (reportData.pending / reportData.total) * 100 : 0}
                       strokeColor="#faad14"
                     />
                   </div>
@@ -632,8 +630,8 @@ const Reports = () => {
                       <span className="text-sm text-gray-600">Low Stock Items</span>
                       <span className="font-medium">{reportData.summary.low_stock_finished_goods || 0}</span>
                     </div>
-                    <Progress 
-                      percent={reportData.summary.finished_goods_items ? (reportData.summary.low_stock_finished_goods / reportData.summary.finished_goods_items) * 100 : 0} 
+                    <Progress
+                      percent={reportData.summary.finished_goods_items ? (reportData.summary.low_stock_finished_goods / reportData.summary.finished_goods_items) * 100 : 0}
                       strokeColor="#ff4d4f"
                     />
                   </div>
@@ -653,8 +651,8 @@ const Reports = () => {
                       <span className="text-sm text-gray-600">Normal Stock</span>
                       <span className="font-medium">{(reportData.summary?.finished_goods_items || 0) - (reportData.summary?.low_stock_finished_goods || 0)}</span>
                     </div>
-                    <Progress 
-                      percent={reportData.summary?.finished_goods_items ? ((reportData.summary.finished_goods_items - reportData.summary.low_stock_finished_goods) / reportData.summary.finished_goods_items) * 100 : 0} 
+                    <Progress
+                      percent={reportData.summary?.finished_goods_items ? ((reportData.summary.finished_goods_items - reportData.summary.low_stock_finished_goods) / reportData.summary.finished_goods_items) * 100 : 0}
                       strokeColor="#52c41a"
                     />
                   </div>
@@ -663,8 +661,8 @@ const Reports = () => {
                       <span className="text-sm text-gray-600">Low Stock</span>
                       <span className="font-medium">{reportData.summary?.low_stock_finished_goods || 0}</span>
                     </div>
-                    <Progress 
-                      percent={reportData.summary?.finished_goods_items ? (reportData.summary.low_stock_finished_goods / reportData.summary.finished_goods_items) * 100 : 0} 
+                    <Progress
+                      percent={reportData.summary?.finished_goods_items ? (reportData.summary.low_stock_finished_goods / reportData.summary.finished_goods_items) * 100 : 0}
                       strokeColor="#ff4d4f"
                     />
                   </div>
@@ -676,22 +674,22 @@ const Reports = () => {
           {/* Quick Actions */}
           <Card title="Quick Actions">
             <div className="space-y-3">
-              <Button 
-                block 
+              <Button
+                block
                 icon={<FileText size={16} />}
                 onClick={() => handleExport('pdf')}
               >
                 Download PDF Report
               </Button>
-              <Button 
-                block 
+              <Button
+                block
                 icon={<Download size={16} />}
                 onClick={() => handleExport('excel')}
               >
                 Export to Excel
               </Button>
-              <Button 
-                block 
+              <Button
+                block
                 icon={<Calendar size={16} />}
                 onClick={() => {
                   setDateRange([dayjs().subtract(7, 'day'), dayjs()]);
@@ -699,8 +697,8 @@ const Reports = () => {
               >
                 Last 7 Days
               </Button>
-              <Button 
-                block 
+              <Button
+                block
                 icon={<Calendar size={16} />}
                 onClick={() => {
                   setDateRange([dayjs().subtract(30, 'day'), dayjs()]);

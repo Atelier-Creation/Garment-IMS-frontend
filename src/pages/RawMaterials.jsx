@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Modal, 
-  Form, 
-  Input, 
-  message, 
-  Space, 
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  message,
+  Space,
   Popconfirm,
   Select,
   Row,
@@ -17,10 +17,10 @@ import {
   Tabs
 } from 'antd';
 import { SearchInput, HelpTooltip } from "../components";
-import { 
-  PlusOutlined, 
-  EditOutlined, 
-  DeleteOutlined, 
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
   SearchOutlined,
   EyeOutlined,
   HistoryOutlined
@@ -60,7 +60,7 @@ const RawMaterials = () => {
         limit: pagination.pageSize,
         search: searchText || undefined
       };
-      
+
       const response = await rawMaterialService.getRawMaterials(params);
       if (response.success) {
         setRawMaterials(response.data.rawMaterials || []);
@@ -257,13 +257,13 @@ const RawMaterials = () => {
         // Group by branch - only show branch name for first occurrence
         const batches = stockData?.batches || [];
         const currentBranchId = record.branch_id;
-        
+
         // Find first index of this branch
         const firstIndex = batches.findIndex(b => b.branch_id === currentBranchId);
-        
+
         // Count how many rows have the same branch
         const rowSpan = batches.filter(b => b.branch_id === currentBranchId).length;
-        
+
         // Only render for the first occurrence
         if (index === firstIndex) {
           return {
@@ -273,7 +273,7 @@ const RawMaterials = () => {
             },
           };
         }
-        
+
         // Return empty cell with rowSpan 0 for subsequent rows
         return {
           children: null,
@@ -320,11 +320,11 @@ const RawMaterials = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           Raw Materials
-          <HelpTooltip 
+          <HelpTooltip
             title="Raw Materials Management"
             content="Manage raw materials inventory including material details, categories, stock levels, and pricing. Create new materials, track stock movements, view stock history, and maintain material specifications for production and purchasing."
           />

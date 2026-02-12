@@ -202,7 +202,7 @@ const Categories = () => {
             onClick={(e) => {
               e.stopPropagation();
               // Find parent category
-              const parentCategory = categories.find(cat => 
+              const parentCategory = categories.find(cat =>
                 cat.Subcategories?.some(sub => sub.id === subcategory.id)
               );
               handleEditSubcategory(parentCategory, subcategory);
@@ -231,11 +231,11 @@ const Categories = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           Categories
-          <HelpTooltip 
+          <HelpTooltip
             title="Categories Management"
             content="Organize products and materials using categories and subcategories. Create hierarchical classification systems, manage category relationships, and maintain organized product catalogs for better inventory management."
           />

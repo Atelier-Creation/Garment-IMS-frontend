@@ -1,26 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Modal, 
-  Form, 
-  Input, 
-  Select, 
-  message, 
-  Space, 
-  Popconfirm, 
-  Row, 
-  Col, 
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Select,
+  message,
+  Space,
+  Popconfirm,
+  Row,
+  Col,
   Tag,
   Divider
 } from 'antd';
-import { 
-  Users as UsersIcon, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Search, 
+import {
+  Users as UsersIcon,
+  Plus,
+  Edit,
+  Trash2,
+  Search,
   RefreshCcw,
   User,
   Mail,
@@ -61,7 +61,7 @@ const Users = () => {
         limit: pagination.pageSize,
         search: search || undefined,
       };
-      
+
       const response = await userService.getUsers(params);
       if (response.success) {
         setUsers(response.data.data || []);
@@ -118,7 +118,7 @@ const Users = () => {
         await userService.createUser(values);
         message.success("User created successfully");
       }
-      
+
       setModalVisible(false);
       setEditingUser(null);
       form.resetFields();
@@ -296,7 +296,7 @@ const Users = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -306,7 +306,7 @@ const Users = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Users
-              <HelpTooltip 
+              <HelpTooltip
                 title="User Management"
                 content="Manage system users including creating accounts, assigning roles, updating user information, and controlling access permissions. Change passwords, activate/deactivate users, and maintain user security settings."
               />
@@ -348,7 +348,7 @@ const Users = () => {
               onChange={(e) => !e.target.value && handleSearch("")}
             />
           </Col>
-          
+
           <Col xs={24} sm={12} md={4}>
             <div className="flex items-center gap-2 h-8">
               <Tag color="blue">Total: {pagination.total}</Tag>

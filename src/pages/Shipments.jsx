@@ -1,29 +1,29 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Modal, 
-  Form, 
-  Input, 
-  Select, 
-  DatePicker, 
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Select,
+  DatePicker,
   InputNumber,
-  message, 
-  Space, 
-  Tooltip, 
+  message,
+  Space,
+  Tooltip,
   Tag,
   Row,
   Col,
   Steps
 } from "antd";
-import { 
-  Truck, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Search, 
-  RefreshCcw, 
+import {
+  Truck,
+  Plus,
+  Edit,
+  Trash2,
+  Search,
+  RefreshCcw,
   Eye,
   MapPin,
   Package
@@ -66,7 +66,7 @@ const Shipments = () => {
         limit: pagination.pageSize,
         search: search || undefined,
       };
-      
+
       const response = await shipmentService.getShipments(params);
       if (response.success) {
         setShipments(response.data.data || []);
@@ -91,7 +91,7 @@ const Shipments = () => {
         salesOrderService.getSalesOrders({ limit: 1000 }),
         customerService.getCustomers({ limit: 1000 })
       ]);
-      
+
       if (salesOrdersRes.success) {
         setSalesOrders(salesOrdersRes.data.data || []);
       }
@@ -295,7 +295,7 @@ const Shipments = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -305,7 +305,7 @@ const Shipments = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Shipments
-              <HelpTooltip 
+              <HelpTooltip
                 title="Shipments Management"
                 content="Track and manage order shipments including shipping details, tracking numbers, delivery status, and logistics coordination. Monitor shipment progress, update delivery information, and manage shipping workflows."
               />

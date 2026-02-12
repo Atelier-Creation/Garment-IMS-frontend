@@ -1,28 +1,28 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Modal, 
-  Form, 
-  Input, 
-  Select, 
-  message, 
-  Space, 
-  Tooltip, 
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Select,
+  message,
+  Space,
+  Tooltip,
   Tag,
   Row,
   Col,
   Statistic
 } from "antd";
-import { 
-  Building2, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  RefreshCcw, 
-  MapPin, 
-  Phone, 
+import {
+  Building2,
+  Plus,
+  Edit,
+  Trash2,
+  RefreshCcw,
+  MapPin,
+  Phone,
   Users,
   Package
 } from "lucide-react";
@@ -58,7 +58,7 @@ const Branches = () => {
         limit: pagination.pageSize,
         search: search || undefined,
       };
-      
+
       const response = await branchService.getBranches(params);
       if (response.success) {
         setBranches(response.data.branches || []);
@@ -181,9 +181,9 @@ const Branches = () => {
       key: "type",
       render: (type) => (
         <Tag color={
-          type === 'FACTORY' ? 'blue' : 
-          type === 'WAREHOUSE' ? 'green' : 
-          type === 'SHOP' ? 'orange' : 'default'
+          type === 'FACTORY' ? 'blue' :
+            type === 'WAREHOUSE' ? 'green' :
+              type === 'SHOP' ? 'orange' : 'default'
         }>
           {type}
         </Tag>
@@ -259,7 +259,7 @@ const Branches = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -269,7 +269,7 @@ const Branches = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Branch Management
-              <HelpTooltip 
+              <HelpTooltip
                 title="Branch Management"
                 content="Manage company branches and locations including branch details, contact information, and operational settings. Create new branches, update existing ones, and organize multi-location business operations."
               />
@@ -437,9 +437,9 @@ const Branches = () => {
                     <label className="text-sm font-medium text-gray-600">Branch Type</label>
                     <div>
                       <Tag color={
-                        viewingBranch.type === 'FACTORY' ? 'blue' : 
-                        viewingBranch.type === 'WAREHOUSE' ? 'green' : 
-                        viewingBranch.type === 'SHOP' ? 'orange' : 'default'
+                        viewingBranch.type === 'FACTORY' ? 'blue' :
+                          viewingBranch.type === 'WAREHOUSE' ? 'green' :
+                            viewingBranch.type === 'SHOP' ? 'orange' : 'default'
                       }>
                         {viewingBranch.type}
                       </Tag>
@@ -457,7 +457,7 @@ const Branches = () => {
                   </div>
                 </Col>
               </Row>
-              
+
               <div className="mt-4">
                 <label className="text-sm font-medium text-gray-600">Address</label>
                 <div className="mt-1">

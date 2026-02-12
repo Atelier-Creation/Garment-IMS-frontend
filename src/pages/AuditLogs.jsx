@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Select, 
-  DatePicker, 
+import {
+  Card,
+  Table,
+  Button,
+  Select,
+  DatePicker,
   Input,
   Tag,
   Row,
@@ -12,10 +12,10 @@ import {
   Tooltip,
   Space
 } from "antd";
-import { 
-  Shield, 
-  Search, 
-  RefreshCcw, 
+import {
+  Shield,
+  Search,
+  RefreshCcw,
   Eye,
   Filter,
   Calendar,
@@ -59,7 +59,7 @@ const AuditLogs = () => {
         start_date: startDate,
         end_date: endDate,
       };
-      
+
       const response = await auditLogService.getAuditLogs(params);
       if (response.success) {
         setAuditLogs(response.data.data || []);
@@ -266,7 +266,7 @@ const AuditLogs = () => {
             </div>
           </Col>
         </Row>
-        
+
         {record.old_values && (
           <div className="mb-3">
             <label className="text-sm font-medium text-gray-600">Old Values</label>
@@ -275,7 +275,7 @@ const AuditLogs = () => {
             </pre>
           </div>
         )}
-        
+
         {record.new_values && (
           <div className="mb-3">
             <label className="text-sm font-medium text-gray-600">New Values</label>
@@ -284,7 +284,7 @@ const AuditLogs = () => {
             </pre>
           </div>
         )}
-        
+
         {record.additional_data && (
           <div>
             <label className="text-sm font-medium text-gray-600">Additional Data</label>
@@ -298,7 +298,7 @@ const AuditLogs = () => {
   };
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -308,7 +308,7 @@ const AuditLogs = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Audit Logs
-              <HelpTooltip 
+              <HelpTooltip
                 title="Audit Logs"
                 content="Track and monitor all system activities and user actions for security and compliance. View detailed logs of who did what and when, filter by users, actions, and date ranges. Essential for security auditing and troubleshooting."
               />
@@ -344,7 +344,7 @@ const AuditLogs = () => {
               onChange={(e) => !e.target.value && handleSearch("")}
             />
           </Col>
-          
+
           <Col xs={24} sm={8} md={4}>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Action
@@ -491,7 +491,7 @@ const AuditLogs = () => {
               <div>
                 <div className="text-sm text-gray-600">Today's Activities</div>
                 <div className="text-xl font-bold">
-                  {auditLogs.filter(log => 
+                  {auditLogs.filter(log =>
                     dayjs(log.created_at).isSame(dayjs(), 'day')
                   ).length}
                 </div>

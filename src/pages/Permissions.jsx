@@ -1,24 +1,24 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Modal, 
-  Form, 
-  Input, 
-  message, 
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  message,
   Popconfirm,
   Row,
   Col,
   Space,
   Tag
 } from "antd";
-import { 
-  Shield, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Search, 
+import {
+  Shield,
+  Plus,
+  Edit,
+  Trash2,
+  Search,
   RefreshCcw,
   Key
 } from "lucide-react";
@@ -52,7 +52,7 @@ const Permissions = () => {
         limit: pagination.pageSize,
         search: search || undefined,
       };
-      
+
       const response = await permissionService.getPermissions(params);
       if (response.success) {
         setPermissions(response.data.data || []);
@@ -96,7 +96,7 @@ const Permissions = () => {
         await permissionService.createPermission(values);
         message.success("Permission created successfully");
       }
-      
+
       setModalVisible(false);
       setEditingPermission(null);
       form.resetFields();
@@ -198,7 +198,7 @@ const Permissions = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -208,7 +208,7 @@ const Permissions = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               Permissions
-              <HelpTooltip 
+              <HelpTooltip
                 title="Permissions Management"
                 content="Define and manage system permissions that control access to features and data. Create granular permissions for different modules, actions, and resources. Permissions are assigned to roles to control user access."
               />
@@ -250,7 +250,7 @@ const Permissions = () => {
               onChange={(e) => !e.target.value && handleSearch("")}
             />
           </Col>
-          
+
           <Col xs={24} sm={12} md={4}>
             <div className="flex items-center gap-2 h-8">
               <Tag color="blue">Total: {pagination.total}</Tag>
@@ -302,13 +302,13 @@ const Permissions = () => {
             label="Permission Code"
             rules={[
               { required: true, message: "Permission code is required" },
-              { 
+              {
                 pattern: /^[a-z0-9._-]+$/,
                 message: "Code can only contain lowercase letters, numbers, dots, underscores, and hyphens"
               }
             ]}
           >
-            <Input 
+            <Input
               placeholder="e.g., user.create, product.view, etc."
               disabled={!!editingPermission}
             />
@@ -322,7 +322,7 @@ const Permissions = () => {
               { min: 3, message: "Description must be at least 3 characters" }
             ]}
           >
-            <TextArea 
+            <TextArea
               rows={3}
               placeholder="Describe what this permission allows users to do"
             />
