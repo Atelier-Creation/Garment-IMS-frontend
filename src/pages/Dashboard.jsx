@@ -168,20 +168,53 @@ const SimpleLineChart = ({ data }) => {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {data.map((item, index) => (
-          <div
-            key={index}
-            className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 hover:scale-105 transition-transform duration-200"
-            data-aos="fade-up"
-            data-aos-delay={index * 100}
-          >
-            <div className="text-sm font-medium text-blue-800 mb-1">{item.month}</div>
-            <div className="text-xl font-bold text-blue-600">
-              ₹<Counter value={item.revenue} formatter={(val) => val.toLocaleString()} />
+        {data.map((item, index) => {
+          let styles = {
+            bg: "from-blue-50 to-blue-100",
+            border: "border-blue-200",
+            textTitle: "text-blue-800",
+            textValue: "text-blue-600",
+            textSub: "text-blue-500"
+          };
+
+          if (index > 0) {
+            const prevRevenue = data[index - 1].revenue || 0;
+            const currentRevenue = item.revenue || 0;
+
+            if (currentRevenue > prevRevenue) {
+              styles = {
+                bg: "from-green-50 to-green-100",
+                border: "border-green-200",
+                textTitle: "text-green-800",
+                textValue: "text-green-600",
+                textSub: "text-green-500"
+              };
+            } else if (currentRevenue < prevRevenue) {
+              styles = {
+                bg: "from-red-50 to-red-100",
+                border: "border-red-200",
+                textTitle: "text-red-800",
+                textValue: "text-red-600",
+                textSub: "text-red-500"
+              };
+            }
+          }
+
+          return (
+            <div
+              key={index}
+              className={`text-center p-4 bg-gradient-to-br ${styles.bg} rounded-lg border ${styles.border} hover:scale-105 transition-transform duration-200`}
+              data-aos="fade-up"
+              data-aos-delay={index * 100}
+            >
+              <div className={`text-sm font-medium ${styles.textTitle} mb-1`}>{item.month}</div>
+              <div className={`text-xl font-bold ${styles.textValue}`}>
+                ₹<Counter value={item.revenue} formatter={(val) => val.toLocaleString()} />
+              </div>
+              <div className={`text-xs ${styles.textSub}`}>Revenue</div>
             </div>
-            <div className="text-xs text-blue-500">Revenue</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Simple trend indicator */}
