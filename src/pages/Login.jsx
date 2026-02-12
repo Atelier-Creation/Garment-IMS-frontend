@@ -112,6 +112,7 @@ const Login = () => {
         data-aos="fade-left"
         className="flex w-full lg:w-1/4 max-h-screen h-screen items-center justify-center px-3 lg:px-8 lg:py-16 bg-white shadow-[-10px_0_20px_rgba(0,0,0,0.05)] aos-init aos-animate"
       >
+        
         <div
           className="w-full max-w-md"
           data-aos="zoom-in"
