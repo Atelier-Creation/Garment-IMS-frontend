@@ -77,6 +77,18 @@ const HeaderBar = ({ collapsed, setCollapsed }) => {
     }
   };
 
+  // Navigate to appropriate page based on notification type
+  const handleNotificationClick = (notification) => {
+    const routes = {
+      sales: "/sales",
+      production: "/production",
+      purchase: "/order"
+    };
+
+    const route = routes[notification.type] || "/dashboard";
+    navigate(route);
+  };
+
   const notificationContent = (
     <div style={{ minWidth: 220 }}>
       <div style={{ padding: 10, fontWeight: 600 }}>Recent Notifications</div>
@@ -91,6 +103,7 @@ const HeaderBar = ({ collapsed, setCollapsed }) => {
           return (
             <List.Item
               key={item.id}
+              onClick={() => handleNotificationClick(item)}
               className="hover:bg-gray-50 transition-colors cursor-pointer"
               style={{ padding: "12px 16px", borderBottom: "1px solid #f3f4f6" }}
             >
@@ -126,8 +139,11 @@ const HeaderBar = ({ collapsed, setCollapsed }) => {
       />
 
       <div style={{ textAlign: "center", padding: 8, borderTop: "1px solid #f3f4f6" }}>
-        <a onClick={() => message.info("View all notifications")}>
-          View all
+        <a
+          onClick={() => navigate("/dashboard")}
+          className="text-blue-600 hover:text-blue-700 cursor-pointer text-sm font-medium"
+        >
+          View all on Dashboard
         </a>
       </div>
     </div>
