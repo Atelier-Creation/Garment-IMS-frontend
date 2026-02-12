@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Bell, User, LogOut, Menu, Search, Command } from "lucide-react";
 import { motion } from "framer-motion";
 import { SearchInput } from "../";
+import { reportService } from "../../services";
 
 const HeaderBar = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
@@ -19,17 +20,51 @@ const HeaderBar = ({ collapsed, setCollapsed }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Mock notifications for now - replace with actual API call
+  // Fetch actual recent activities from dashboard API
   useEffect(() => {
-    setRecentNotifications([
-      { id: 1, title: "Low Stock Alert", message: "Product ABC is running low", type: "error" },
-      { id: 2, title: "New Order", message: "Order #12345 received", type: "info" },
-      { id: 3, title: "Production Complete", message: "Batch #789 completed", type: "success" },
-    ]);
+    const fetchNotifications = async () => {
+      setLoadingNotifications(true);
+      try {
+        const response = await reportService.getDashboardStats();
+        if (response.success && response.data.recent_activities) {
+          // Map recent activities to notifications format
+          const notifications = response.data.recent_activities.map((activity, index) => ({
+            id: index,
+            title: activity.activity,
+            message: `${activity.reference} • ${new Date(activity.created_at).toLocaleString('en-GB', {
+              day: '2-digit',
+              month: 'short',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}`,
+            type: activity.type || 'info', // sales, production, purchase
+            timestamp: activity.created_at
+          }));
+          setRecentNotifications(notifications);
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        // Fallback to empty array on error
+        setRecentNotifications([]);
+      } finally {
+        setLoadingNotifications(false);
+      }
+    };
+
+    fetchNotifications();
+    // Refresh notifications every 2 minutes
+    const interval = setInterval(fetchNotifications, 120000);
+    return () => clearInterval(interval);
   }, []);
 
   const getNotificationStyle = (type) => {
     switch (type) {
+      case "sales":
+        return { bg: "#eff6ff", color: "#3b82f6", border: "#bfdbfe" }; // Blue
+      case "production":
+        return { bg: "#f0fdf4", color: "#22c55e", border: "#bbf7d0" }; // Green
+      case "purchase":
+        return { bg: "#fff7ed", color: "#f97316", border: "#fed7aa" }; // Orange
       case "error":
       case "warning":
         return { bg: "#fef2f2", color: "#ef4444", border: "#fecaca" }; // Red
