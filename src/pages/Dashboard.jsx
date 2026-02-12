@@ -59,7 +59,7 @@ const SimplePieChart = ({ data }) => {
   if (total === 0 || data.length === 0) {
     return (
       <div className="text-center py-8">
-        <PieChart size={48} className="mx-auto mb-2 opacity-50" />
+        <PieChart size={48} className="mx-auto mb-2 opacity-60" />
         <p className="text-gray-500">No data available</p>
       </div>
     );

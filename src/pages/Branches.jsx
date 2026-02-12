@@ -301,7 +301,7 @@ const Branches = () => {
       </div>
 
       {/* Search */}
-      <Card className="mb-6">
+      <Card className="!mb-4">
         <SearchInput
           placeholder="Search branches by name, code, or manager..."
           allowClear
