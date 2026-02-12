@@ -50,11 +50,30 @@ const Counter = ({ value, duration = 1000, formatter }) => {
 };
 
 // Simple Chart Components
-const SimplePieChart = ({ data }) => {
+const SimplePieChart = ({ data, bgColor }) => {
   console.log('SimplePieChart data:', data); // Debug log
 
   const total = data.reduce((sum, item) => sum + item.value, 0);
   const colors = ['#1890ff', '#52c41a', '#faad14', '#f5222d', '#722ed1'];
+
+  // Generate a random vibrant gradient background if not provided
+  const getRandomGradient = () => {
+    const gradients = [
+      'bg-gradient-to-br from-blue-400 to-blue-600',
+      'bg-gradient-to-br from-purple-400 to-purple-600',
+      'bg-gradient-to-br from-pink-400 to-pink-600',
+      'bg-gradient-to-br from-green-400 to-green-600',
+      'bg-gradient-to-br from-yellow-400 to-yellow-600',
+      'bg-gradient-to-br from-red-400 to-red-600',
+      'bg-gradient-to-br from-indigo-400 to-indigo-600',
+      'bg-gradient-to-br from-teal-400 to-teal-600',
+      'bg-gradient-to-br from-orange-400 to-orange-600',
+      'bg-gradient-to-br from-cyan-400 to-cyan-600',
+    ];
+    return gradients[Math.floor(Math.random() * gradients.length)];
+  };
+
+  const backgroundClass = bgColor || getRandomGradient();
 
   if (total === 0 || data.length === 0) {
     return (
@@ -69,12 +88,12 @@ const SimplePieChart = ({ data }) => {
     <div className="text-center">
       {/* Simple circular representation */}
       <div className="relative w-32 h-32 mx-auto mb-4" data-aos="zoom-in" data-aos-duration="600">
-        <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center">
+        <div className={`w-full h-full rounded-full ${backgroundClass} flex items-center justify-center shadow-lg`}>
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-700">
+            <div className="text-2xl font-bold text-white drop-shadow-md">
               <Counter value={total} />
             </div>
-            <div className="text-xs text-gray-500">Total</div>
+            <div className="text-xs text-white/90 drop-shadow">Total</div>
           </div>
         </div>
       </div>
