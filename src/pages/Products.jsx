@@ -6,6 +6,38 @@ import { SearchInput, HelpTooltip } from "../components";
 
 const { Option } = Select;
 
+const SelectWithAdd = ({
+  value,
+  onChange,
+  onAdd,
+  addDisabled,
+  addTitle,
+  children,
+  ...selectProps
+}) => {
+  return (
+    <div className="flex gap-2">
+      <Select
+        value={value}
+        onChange={onChange}
+        style={{ flex: 1 }}
+        {...selectProps}
+      >
+        {children}
+      </Select>
+      <Button
+        type="dashed"
+        icon={<PlusOutlined />}
+        onClick={onAdd}
+        disabled={addDisabled}
+        title={addTitle}
+      >
+        Add
+      </Button>
+    </div>
+  );
+};
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -25,6 +57,7 @@ const Products = () => {
   const [form] = Form.useForm();
   const [categoryForm] = Form.useForm();
   const [subcategoryForm] = Form.useForm();
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -91,6 +124,7 @@ const Products = () => {
   };
 
   const handleSubmit = async (values) => {
+    setSubmitLoading(true);
     try {
       if (editingProduct) {
         await productService.updateProduct(editingProduct.id, values);
@@ -106,6 +140,8 @@ const Products = () => {
     } catch (error) {
       message.error('Failed to save product');
       console.error('Error saving product:', error);
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -124,6 +160,12 @@ const Products = () => {
     setSelectedCategoryId(categoryId);
     // Reset subcategory when category changes
     form.setFieldsValue({ subCategoryId: undefined });
+  };
+
+  const handleFormValuesChange = (changedValues, allValues) => {
+    if ('categoryId' in changedValues) {
+      handleCategoryChange(changedValues.categoryId);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -152,6 +194,7 @@ const Products = () => {
 
   // Handle category creation
   const handleCreateCategory = async (values) => {
+    setSubmitLoading(true);
     try {
       const response = await categoryService.createCategory(values);
       if (response.success) {
@@ -163,11 +206,14 @@ const Products = () => {
     } catch (error) {
       message.error('Failed to create category');
       console.error('Error creating category:', error);
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
   // Handle subcategory creation
   const handleCreateSubcategory = async (values) => {
+    setSubmitLoading(true);
     try {
       const subcategoryData = {
         ...values,
@@ -183,6 +229,8 @@ const Products = () => {
     } catch (error) {
       message.error('Failed to create subcategory');
       console.error('Error creating subcategory:', error);
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -362,6 +410,7 @@ const Products = () => {
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
+          onValuesChange={handleFormValuesChange}
         >
           <Row gutter={16}>
             <Col span={12}>
@@ -389,56 +438,37 @@ const Products = () => {
             label="Category"
             rules={[{ required: true, message: 'Please select category' }]}
           >
-            <div className="flex gap-2">
-              <Select
-                placeholder="Select category"
-                onChange={handleCategoryChange}
-                style={{ flex: 1 }}
-              >
-                {Array.isArray(categories) && categories.map(category => (
-                  <Option key={category.id} value={category.id}>
-                    {category.name}
-                  </Option>
-                ))}
-              </Select>
-              <Button
-                type="dashed"
-                icon={<PlusOutlined />}
-                onClick={openCategoryModal}
-                title="Add new category"
-              >
-                Add
-              </Button>
-            </div>
+            <SelectWithAdd
+              placeholder="Select category"
+              onAdd={openCategoryModal}
+              addTitle="Add new category"
+            >
+              {Array.isArray(categories) && categories.map(category => (
+                <Option key={category.id} value={category.id}>
+                  {category.name}
+                </Option>
+              ))}
+            </SelectWithAdd>
           </Form.Item>
 
           <Form.Item
             name="subCategoryId"
             label="Subcategory"
           >
-            <div className="flex gap-2">
-              <Select
-                placeholder="Select subcategory"
-                disabled={!selectedCategoryId}
-                allowClear
-                style={{ flex: 1 }}
-              >
-                {Array.isArray(subcategories) && subcategories.map(subcategory => (
-                  <Option key={subcategory.id} value={subcategory.id}>
-                    {subcategory.name}
-                  </Option>
-                ))}
-              </Select>
-              <Button
-                type="dashed"
-                icon={<PlusOutlined />}
-                onClick={openSubcategoryModal}
-                disabled={!selectedCategoryId}
-                title="Add new subcategory"
-              >
-                Add
-              </Button>
-            </div>
+            <SelectWithAdd
+              placeholder="Select subcategory"
+              onAdd={openSubcategoryModal}
+              addTitle="Add new subcategory"
+              disabled={!selectedCategoryId}
+              allowClear
+              addDisabled={!selectedCategoryId}
+            >
+              {Array.isArray(subcategories) && subcategories.map(subcategory => (
+                <Option key={subcategory.id} value={subcategory.id}>
+                  {subcategory.name}
+                </Option>
+              ))}
+            </SelectWithAdd>
           </Form.Item>
 
           <Form.Item
@@ -522,7 +552,7 @@ const Products = () => {
             }}>
               Cancel
             </Button>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={submitLoading}>
               {editingProduct ? 'Update' : 'Create'}
             </Button>
           </div>
@@ -570,7 +600,7 @@ const Products = () => {
             }}>
               Cancel
             </Button>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={submitLoading}>
               Create Category
             </Button>
           </div>
@@ -628,7 +658,7 @@ const Products = () => {
             }}>
               Cancel
             </Button>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={submitLoading}>
               Create Subcategory
             </Button>
           </div>
